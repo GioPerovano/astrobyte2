@@ -1,0 +1,72 @@
+/* Estilo comum do site AstroByte: cores da logo, céu estrelado, menu e rodapé. */
+
+/* Paleta tirada da logo: creme, dourado e laranja sobre o preto do espaço.
+   A página é sempre escura, nos dois modos do sistema, porque o céu é a identidade do AstroByte. */
+:root, :root[data-theme="light"], :root[data-theme="dark"]{
+  --space:#000; --ink:#FFF4DC; --muted:#B9B3C9; --line:rgba(255,244,220,.14);
+  --gold:#FFC24A; --orange:#F7931E; --nebula:#5B3FD1; --nebula-2:#1F5FBF;
+  --glass:rgba(8,9,22,.72); --glass-strong:rgba(8,9,22,.9); --button-ink:#1A1004;
+  --display:"Exo 2","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  color-scheme:dark; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ color-scheme:dark } }
+html{min-height:100%; background:#000; scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0; min-height:100%; background:transparent; color:var(--ink); font:400 .95rem/1.5 var(--body)}
+a{color:inherit}
+button{font:inherit}
+
+/* ---------- céu: estrelas (canvas) + nebulosas suaves ---------- */
+#ceu{position:fixed; inset:0; width:100%; height:100%; z-index:-1; display:block; background:#000}
+.nebula{position:fixed; inset:-20%; z-index:-1; pointer-events:none; opacity:.55;
+  background:
+    radial-gradient(38% 30% at 22% 28%, rgba(91,63,209,.28), transparent 70%),
+    radial-gradient(30% 26% at 78% 70%, rgba(31,95,191,.22), transparent 70%),
+    radial-gradient(26% 18% at 64% 18%, rgba(247,147,30,.10), transparent 70%);
+  animation:deriva 90s ease-in-out infinite alternate}
+@keyframes deriva{ from{transform:translate3d(-2%,-1%,0) rotate(0deg)} to{transform:translate3d(2%,1.5%,0) rotate(4deg)} }
+
+/* ---------- topo e menu ---------- */
+.top{position:relative; z-index:20; display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:8px 16px; border-bottom:1px solid var(--line); background:linear-gradient(to bottom, rgba(0,0,0,.85), rgba(0,0,0,.4))}
+.logo{display:block; line-height:0}
+.logo img{height:46px; width:auto}
+.menu-btn{display:none; align-items:center; gap:.4rem; padding:.45rem .8rem; border:1px solid var(--line); border-radius:999px;
+  background:transparent; color:var(--ink); cursor:pointer; font:600 .9rem/1 var(--display)}
+.menu-btn svg{width:18px; height:18px}
+.menu{display:flex; align-items:center; gap:4px}
+.menu a, .menu .soon{display:block; padding:.5rem .8rem; border-radius:999px; text-decoration:none; font:600 .92rem/1.1 var(--display); color:var(--muted)}
+.menu a:hover{color:var(--ink); background:rgba(255,244,220,.07)}
+.menu a[aria-current="page"]{color:var(--button-ink); background:var(--gold)}
+.menu .sep{width:1px; height:24px; margin:0 8px; background:var(--line)}
+.menu .partner{display:flex; align-items:center; gap:4px}
+.menu .partner small{color:var(--muted); font-size:.72rem; margin-right:2px}
+.menu .soon{opacity:.6; cursor:default}
+@media (max-width:760px){
+  .menu-btn{display:inline-flex}
+  .menu{display:none; position:absolute; right:12px; top:calc(100% + 6px); flex-direction:column; align-items:stretch; gap:2px;
+    min-width:230px; padding:8px; border:1px solid var(--line); border-radius:14px; background:var(--glass-strong); backdrop-filter:blur(12px)}
+  .menu[data-open]{display:flex}
+  .menu .sep{width:auto; height:1px; margin:6px 4px}
+  .menu .partner{flex-direction:column; align-items:stretch}
+  .menu .partner small{padding:.2rem .8rem 0}
+  .menu a, .menu .soon{border-radius:10px}
+}
+
+/* ---------- rodapé ---------- */
+.foot{position:relative; z-index:1; padding:28px 16px calc(28px + env(safe-area-inset-bottom,0px)); border-top:1px solid var(--line);
+  background:linear-gradient(to top, rgba(0,0,0,.92), rgba(0,0,0,.5)); text-align:center}
+.foot img{height:64px; width:auto; margin:0 auto 12px; display:block}
+.social{display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin:0 0 14px; padding:0; list-style:none}
+.social a{display:inline-flex; align-items:center; gap:.45rem; padding:.5rem .85rem; border:1px solid var(--line); border-radius:999px;
+  text-decoration:none; font:600 .88rem/1 var(--display); color:var(--ink)}
+.social a:hover{border-color:var(--gold); color:var(--gold)}
+.social svg{width:16px; height:16px}
+.mail{margin:0 0 14px; font-size:.95rem}
+.mail a{color:var(--gold)}
+.credit{margin:0; color:var(--muted); font-size:.85rem; max-width:60ch; margin-inline:auto}
+button:focus-visible, a:focus-visible, summary:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
+button:focus-visible, a:focus-visible, summary:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
+@media (prefers-reduced-motion: reduce){ .nebula{animation:none} }

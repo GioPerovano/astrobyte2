@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>AstroByte: Corrida Estelar</title>
+<meta name="description" content="Jogo de navegador: guie o astronauta entre asteroides e colete cartas com informações de estrelas reais.">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="../comum/logo-topo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#FFF4DC; --muted:#B9B3C9; --gold:#FFC24A; --orange:#F7931E; --violet:#8B7CFF; --red:#FF5A3C;
+  --panel:rgba(6,7,18,.92); --line:rgba(255,244,220,.18);
+  --pixel:"Press Start 2P", ui-monospace, monospace;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ color-scheme:dark } }
+:root[data-theme="dark"], :root[data-theme="light"]{ color-scheme:dark }
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0; height:100%; background:#000; color:var(--ink); overflow:hidden; overscroll-behavior:none;
+  -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; touch-action:none}
+canvas#jogo{position:fixed; inset:0; width:100vw; height:100vh; height:100dvh; display:block; image-rendering:pixelated; image-rendering:crisp-edges}
+
+/* ---------- barra de cima ---------- */
+.hud{position:fixed; z-index:5; left:0; right:0; top:0; display:flex; align-items:center; gap:10px;
+  padding:calc(10px + env(safe-area-inset-top,0px)) calc(12px + env(safe-area-inset-right,0px)) 0 calc(12px + env(safe-area-inset-left,0px));
+  pointer-events:none; font:400 11px/1.4 var(--pixel); text-shadow:2px 2px 0 #000}
+.hud .grow{flex:1}
+.hud button{pointer-events:auto; display:grid; place-items:center; height:34px; min-width:34px; padding:0 10px; border:2px solid var(--line);
+  border-radius:6px; background:rgba(0,0,0,.55); color:var(--ink); font:400 10px/1 var(--pixel); cursor:pointer}
+.hud button svg{width:16px; height:16px}
+.score{display:flex; gap:14px; flex-wrap:wrap; justify-content:flex-end}
+.score b{color:var(--gold); font-weight:400}
+@media (max-width:420px){ .hud{font-size:9px} }
+
+/* ---------- menu ---------- */
+.menu{position:fixed; z-index:20; top:calc(52px + env(safe-area-inset-top,0px)); left:calc(12px + env(safe-area-inset-left,0px)); display:none; flex-direction:column; gap:4px;
+  min-width:220px; padding:8px; border:2px solid var(--line); border-radius:8px; background:var(--panel)}
+.menu[data-open]{display:flex}
+.menu a{display:block; padding:10px 12px; border-radius:6px; color:var(--ink); text-decoration:none; font:400 10px/1.4 var(--pixel)}
+.menu a:hover, .menu a:focus-visible{background:rgba(255,194,74,.15)}
+.menu a[aria-current="page"]{background:var(--gold); color:#1a1004}
+.menu hr{width:100%; border:0; border-top:2px dashed var(--line); margin:6px 0}
+.menu small{padding:2px 12px; color:var(--muted); font:400 8px/1 var(--pixel)}
+
+/* ---------- telas (início, fim) ---------- */
+.screen{position:fixed; inset:0; z-index:10; display:none; place-items:center; padding:20px; pointer-events:none}
+.screen[data-open]{display:grid}
+.box{pointer-events:auto; max-width:min(560px,92vw); padding:22px 22px 20px; border:3px solid var(--gold); border-radius:4px;
+  background:var(--panel); box-shadow:0 0 0 3px #000, 0 0 40px rgba(247,147,30,.35); text-align:center}
+.box img.logo{width:min(240px,60vw); height:auto; margin:-4px auto 6px; display:block}
+.box h1, .box h2{margin:0 0 12px; font:400 clamp(14px,3.6vw,20px)/1.5 var(--pixel); color:var(--gold)}
+.box p{margin:0 0 12px; font:400 15px/1.5 var(--body)}
+.keys{display:grid; grid-template-columns:auto 1fr; gap:6px 12px; margin:6px auto 16px; max-width:360px; text-align:left; font:400 14px/1.4 var(--body)}
+.keys kbd{font:400 9px/1 var(--pixel); padding:5px 6px; border:2px solid var(--line); border-radius:4px; background:#000; color:var(--gold); justify-self:start}
+.go{display:inline-block; padding:14px 18px; border:0; border-radius:4px; background:var(--gold); color:#1a1004; font:400 12px/1 var(--pixel);
+  box-shadow:0 4px 0 #9a5a07; cursor:pointer}
+.go:active{transform:translateY(2px); box-shadow:0 2px 0 #9a5a07}
+.blink{animation:pisca 1.1s steps(2) infinite}
+@keyframes pisca{50%{opacity:.25}}
+.tiny{margin-top:12px !important; color:var(--muted); font-size:13px !important}
+.album{display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin:6px 0 14px}
+.album span{padding:6px 8px; border:2px solid var(--line); border-radius:4px; font:400 8px/1.3 var(--pixel); color:var(--muted)}
+.album span.got{border-color:var(--gold); color:var(--gold)}
+
+/* ---------- carta estelar ---------- */
+.cardwrap{position:fixed; inset:0; z-index:15; display:none; place-items:center; padding:16px; background:rgba(0,0,0,.55)}
+.cardwrap[data-open]{display:grid}
+.star-card{width:min(420px,94vw); max-height:92dvh; overflow:auto; padding:14px; border:3px solid var(--orange); border-radius:6px;
+  background:linear-gradient(180deg,#0d1030,#05060f); box-shadow:0 0 0 3px #000, 0 0 50px rgba(247,147,30,.45);
+  animation:surge .35s steps(5) both}
+@keyframes surge{from{transform:scale(.6) rotate(-4deg); opacity:0} to{transform:none; opacity:1}}
+.star-card .new{margin:0 0 8px; text-align:center; font:400 9px/1 var(--pixel); color:var(--gold)}
+.star-card h2{margin:0 0 10px; text-align:center; font:400 clamp(12px,3.4vw,15px)/1.5 var(--pixel)}
+.pic{position:relative; border:2px solid var(--line); border-radius:4px; background:#000; overflow:hidden}
+.pic canvas{display:block; width:100%; height:auto; image-rendering:pixelated}
+.pic img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
+.meta{display:grid; grid-template-columns:auto 1fr; gap:4px 10px; margin:12px 0 8px; font:400 14px/1.35 var(--body)}
+.meta dt{color:var(--muted)}
+.meta dd{margin:0; color:var(--gold); font-weight:700}
+.star-card ul{margin:0 0 10px; padding-left:1.1rem; font:400 15px/1.45 var(--body)}
+.star-card li{margin:.25rem 0}
+.star-card .src{margin:0 0 12px; font:400 12px/1.4 var(--body); color:var(--muted)}
+.star-card .go{display:block; width:100%}
+button:focus-visible, a:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
+@media (prefers-reduced-motion: reduce){ .blink, .star-card{animation:none} }
+</style>
+</head>
+<body>
+<canvas id="jogo" aria-label="Jogo AstroByte: Corrida Estelar"></canvas>
+
+<div class="hud">
+  <button type="button" id="menuBtn" aria-expanded="false" aria-controls="menu">MENU</button>
+  <button type="button" id="pauseBtn" aria-label="Pausar"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="3" y="2" width="4" height="12"/><rect x="9" y="2" width="4" height="12"/></svg></button>
+  <button type="button" id="somBtn" aria-label="Desligar som" aria-pressed="true"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M2 6h3l4-3v10L5 10H2z"/><path id="ondas" d="M11 5c1 1 1 5 0 6M12.5 3.5c2 2 2 7 0 9" stroke="currentColor" fill="none" stroke-width="1.5"/></svg></button>
+  <span class="grow"></span>
+  <div class="score" aria-live="off">
+    <span>CARTAS <b id="hCartas">0/8</b></span>
+    <span>REC <b id="hRec">00000</b></span>
+    <span><b id="hDist">00000</b></span>
+  </div>
+</div>
+
+<nav class="menu" id="menu" aria-label="Menu principal">
+  <a href="../ar/">Realidade aumentada</a>
+  <a href="../cartas/">Card game</a>
+  <a href="./" aria-current="page">Jogo</a>
+  <hr>
+  <small>PARCEIRO</small>
+  <!-- Troque "#" pelo endereço do site parceiro e apague data-pending. -->
+  <a href="#" id="partnerLink" data-pending>Site parceiro</a>
+</nav>
+
+<div class="screen" id="inicio" data-open>
+  <div class="box">
+    <img class="logo" src="../comum/logo.png" alt="AstroByte">
+    <h1>CORRIDA ESTELAR</h1>
+    <p>Desvie dos asteroides e pegue as estrelas douradas. Cada estrela abre uma carta com um objeto real do espaço.</p>
+    <div class="keys">
+      <kbd>TOQUE</kbd><span>ou <b>espaço</b>: impulso do jato. Toque rápido = pulo baixo; segure = pulo alto</span>
+      <kbd>↓</kbd><span>ou deslize para baixo: descer rápido</span>
+      <kbd>P</kbd><span>pausar</span>
+    </div>
+    <button class="go blink" type="button" id="startBtn">COMEÇAR</button>
+    <p class="tiny" id="dicaGire" hidden>Dica: deite o celular para enxergar os asteroides mais cedo.</p>
+    <p class="tiny">Nada fica salvo: ao recarregar a página, tudo recomeça.</p>
+  </div>
+</div>
+
+<div class="screen" id="fim">
+  <div class="box">
+    <h2>FIM DA MISSÃO</h2>
+    <p id="fimTexto"></p>
+    <div class="album" id="album"></div>
+    <button class="go" type="button" id="againBtn">JOGAR DE NOVO</button>
+  </div>
+</div>
+
+<div class="screen" id="pausa">
+  <div class="box">
+    <h2>PAUSA</h2>
+    <button class="go" type="button" id="resumeBtn">CONTINUAR</button>
+  </div>
+</div>
+
+<div class="cardwrap" id="cardwrap" role="dialog" aria-modal="true" aria-labelledby="cTitulo">
+  <article class="star-card">
+    <p class="new" id="cNova">NOVA CARTA!</p>
+    <h2 id="cTitulo"></h2>
+    <div class="pic"><canvas id="cArte" width="96" height="60"></canvas><img id="cFoto" alt="" hidden></div>
+    <dl class="meta" id="cMeta"></dl>
+    <ul id="cFatos"></ul>
+    <p class="src" id="cFonte"></p>
+    <button class="go" type="button" id="contBtn">CONTINUAR</button>
+  </article>
+</div>
+
+<script>
+/* =====================================================================
+   AstroByte: Corrida Estelar
+   Pixel art desenhado em uma tela pequena e ampliado sem suavizar.
+   Nada é salvo: recarregar a página recomeça tudo.
+   ===================================================================== */
+
+/* ---------- cartas estelares ----------
+   foto: coloque uma imagem com esse nome na pasta jogo/fotos/ e ela aparece na carta.
+   Sem a foto, a carta mostra uma ilustração em pixel art. */
+const CARTAS = [
+  { id:"spherex", nome:"SPHEREx", foto:"fotos/spherex.jpg", arte:"telescopio",
+    meta:[["Tipo","Telescópio espacial da NASA"],["Onde","Em órbita da Terra"],["Lançamento","março de 2025"]],
+    fatos:["Fotografa o céu inteiro em 102 cores de infravermelho.","Faz um mapa completo do céu a cada seis meses."],
+    fonte:"NASA/JPL-Caltech" },
+  { id:"barnard", nome:"Estrela de Barnard", foto:"fotos/barnard.jpg", arte:"anaVermelha",
+    meta:[["Tipo","Anã vermelha"],["Distância","cerca de 6 anos-luz"],["Constelação","Serpentário"]],
+    fatos:["É a estrela que muda de posição mais rápido no nosso céu.","É a estrela solitária mais perto do Sol, e tem planetas pequenos girando em volta dela."],
+    fonte:"NASA" },
+  { id:"wise0855", nome:"WISE 0855", foto:"fotos/wise0855.jpg", arte:"anaMarrom",
+    meta:[["Tipo","Anã marrom"],["Distância","cerca de 7,4 anos-luz"],["Descoberta","2014, com o telescópio WISE"]],
+    fatos:["É a anã marrom mais fria que conhecemos, perto da temperatura em que a água congela.","Anãs marrons são grandes demais para ser planetas e pequenas demais para brilhar como estrelas."],
+    fonte:"NASA / WISE" },
+  { id:"epsilon", nome:"Epsilon Indi B", foto:"fotos/epsilon-indi.jpg", arte:"duplaMarrom",
+    meta:[["Tipo","Par de anãs marrons"],["Distância","cerca de 12 anos-luz"],["Constelação","Índio"]],
+    fatos:["São duas anãs marrons que giram uma em volta da outra.","O sistema também tem uma estrela e um planeta gigante frio, fotografado pelo telescópio James Webb."],
+    fonte:"NASA / Webb" },
+  { id:"rdra", nome:"R Draconis", foto:"fotos/r-draconis.jpg", arte:"gigante",
+    meta:[["Tipo","Gigante vermelha variável"],["Constelação","Dragão"]],
+    fatos:["Ela pulsa: fica mais forte e mais fraca em ciclos de alguns meses.","Gigantes vermelhas são estrelas velhas e inchadas. O Sol vai virar uma daqui a bilhões de anos."],
+    fonte:"Catálogos de estrelas variáveis" },
+  { id:"rwaur", nome:"RW Aurigae", foto:"fotos/rw-aurigae.jpg", arte:"jovem",
+    meta:[["Tipo","Estrela jovem (dupla)"],["Constelação","Cocheiro"]],
+    fatos:["É uma estrela recém-nascida, ainda cercada de gás e poeira.","De vez em quando o brilho dela cai muito, quando nuvens de poeira passam na frente."],
+    fonte:"NASA / Chandra" },
+  { id:"sedna", nome:"Sedna", foto:"fotos/sedna.jpg", arte:"sedna",
+    meta:[["Tipo","Objeto do Sistema Solar distante"],["Descoberta","2003"],["Uma volta no Sol","mais de 11 mil anos"]],
+    fatos:["É um dos corpos mais distantes que conhecemos no Sistema Solar.","A órbita comprida dela é uma das pistas da hipótese do Planeta X."],
+    fonte:"NASA" },
+  { id:"planetax", nome:"Planeta X", foto:"fotos/planeta-x.jpg", arte:"planetaX",
+    meta:[["Tipo","Planeta hipotético"],["Massa estimada","algumas vezes a da Terra"],["Proposto em","2016"]],
+    fatos:["Ninguém viu este planeta ainda. Ele explicaria órbitas estranhas de objetos distantes.","Telescópios infravermelhos ajudam na busca, porque até mundos frios emitem um pouco de calor."],
+    fonte:"Hipótese científica em estudo" }
+];
+
+/* ---------- utilidades ---------- */
+const $ = id => document.getElementById(id);
+const cv = $("jogo"), ctx = cv.getContext("2d");
+const calmo = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+let W=320, H=180, ESC=3, CHAO=156, FV=1;
+const rnd=(a,b)=>a+Math.random()*(b-a), rint=(a,b)=>Math.floor(rnd(a,b+1));
+const PAL={preto:"#000",tinta:"#FFF4DC",ouro:"#FFC24A",laranja:"#F7931E",violeta:"#8B7CFF",azul:"#3B6FE0",cinza:"#6E6A80",cinzaE:"#3A3748",cinzaC:"#A9A3B8",vermelho:"#FF5A3C"};
+
+function sprite(w,h,desenho){ const c=document.createElement("canvas"); c.width=w; c.height=h; desenho(c.getContext("2d")); return c; }
+// desenha um mapa de caracteres como pixels
+function mapa(linhas,cores){
+  return sprite(linhas[0].length,linhas.length,g=>{
+    linhas.forEach((l,y)=>[...l].forEach((ch,x)=>{ if(cores[ch]){ g.fillStyle=cores[ch]; g.fillRect(x,y,1,1); } }));
+  });
+}
+
+/* ---------- sprites ---------- */
+const COR_ASTRO={W:"#FFF4DC",w:"#C9C2D6",V:"#3B6FE0",v:"#8FB4FF",O:"#F7931E",K:"#1A1A2A",G:"#FFC24A"};
+const ASTRO=[
+  mapa(["....WWWW....","...WWWWWW...","..WWVVVVWW..","..WVvvVVVW..","..WVVVVVVW..","..WWVVVVWW..","...WWWWWW...",
+        ".KKWWWWWWW..",".KOWWGWWWWW.",".KKWWWWWWWW.",".KKWwWWWWW..","..KWWWWWW...","...WW..WW...","...WW..WW...","..www..www.."],COR_ASTRO),
+  mapa(["....WWWW....","...WWWWWW...","..WWVVVVWW..","..WVvvVVVW..","..WVVVVVVW..","..WWVVVVWW..","...WWWWWW...",
+        ".KKWWWWWWW..",".KOWWGWWWWW.",".KKWWWWWWWW.",".KKWwWWWWW..","..KWWWWWW...","...WW.WW....","..WW...WW...",".www...www.."],COR_ASTRO)
+];
+const ASTRO_CAI=mapa(["....WWWW....","...WWWWWW...","..WWVVVVWW..","..WVvvVVVW..","..WVVVVVVW..","..WWVVVVWW..","...WWWWWW...",
+        ".KKWWWWWWW..",".KOWWGWWWWWW",".KKWWWWWWW..",".KKWwWWWWW..","..KWWWWWW...","...WWWWWW...","....WWWW....","....wwww...."],COR_ASTRO);
+
+// asteroide pixelado com crateras e sombreado pontilhado
+function fazAsteroide(r, seed){
+  let s=seed; const rand=()=>((s=(s*9301+49297)%233280)/233280);
+  const d=r*2+2;
+  return sprite(d,d,g=>{
+    const raio=[]; for(let i=0;i<16;i++) raio.push(r*(0.78+rand()*0.22));
+    for(let y=0;y<d;y++) for(let x=0;x<d;x++){
+      const dx=x-r-0.5, dy=y-r-0.5, ang=(Math.atan2(dy,dx)+Math.PI)/(2*Math.PI)*16, i=Math.floor(ang)%16, f=ang-Math.floor(ang);
+      const lim=raio[i]*(1-f)+raio[(i+1)%16]*f, dist=Math.hypot(dx,dy);
+      if(dist>lim) continue;
+      const luz=(-dx-dy)/(r*1.6)+0.2, borda=dist>lim-1.2;
+      let c = luz>0.45?"#B9B2C7":luz>0.05?"#8C85A0":luz>-0.35?"#5F5974":"#3A3550";
+      if(luz>0.05 && luz<=0.45 && (x+y)%2===0 && luz<0.2) c="#5F5974";
+      g.fillStyle=borda?"#24202F":c; g.fillRect(x,y,1,1);
+    }
+    for(let k=0;k<Math.max(1,r/3);k++){ // crateras
+      const cx=r*0.5+rand()*r, cy=r*0.5+rand()*r, cr=Math.max(1,rand()*r*0.28);
+      g.fillStyle="#3A3550"; g.beginPath(); g.arc(cx,cy,cr,0,7); g.fill();
+      g.fillStyle="#B9B2C7"; g.fillRect(Math.round(cx+cr*0.4),Math.round(cy+cr*0.4),1,1);
+    }
+  });
+}
+const ASTEROIDES=[]; for(let i=0;i<10;i++) ASTEROIDES.push(fazAsteroide(rint(6,11), i*7919+13));
+
+const ESTRELA=[0,1,2,3].map(f=>sprite(13,13,g=>{
+  const c=6, a=[6,5,4,5][f];
+  g.fillStyle="#FFF4DC"; g.fillRect(c,c-a,1,a*2+1); g.fillRect(c-a,c,a*2+1,1);
+  g.fillStyle=PAL.ouro; g.fillRect(c-1,c-1,3,3); g.fillRect(c-2,c,5,1); g.fillRect(c,c-2,1,5);
+  g.fillStyle="#FFF4DC"; g.fillRect(c,c,1,1);
+  if(f%2){ g.fillStyle="rgba(255,194,74,.5)"; g.fillRect(c-3,c-3,1,1); g.fillRect(c+3,c-3,1,1); g.fillRect(c-3,c+3,1,1); g.fillRect(c+3,c+3,1,1); }
+}));
+
+/* ---------- cenário ---------- */
+let estrelasFundo=[], solo=[];
+function montarCenario(){
+  estrelasFundo=[];
+  const n=Math.round(W*H/90);
+  for(let i=0;i<n;i++){ const camada=Math.random(); estrelasFundo.push({x:Math.random()*W, y:Math.random()*(CHAO-4), z:camada<.7?0.06:camada<.93?0.15:0.3,
+    c:["#FFF4DC","#FFD696","#C8D7FF","#8B7CFF"][rint(0,3)], f:Math.random()*6}); }
+  solo=[]; for(let x=0;x<W+40;x+=rint(10,26)) solo.push({x, r:rint(2,6), t:rint(0,2)});
+}
+// planeta grande ao fundo (pixelado, com anel)
+const PLANETA=sprite(70,70,g=>{
+  for(let y=0;y<70;y++) for(let x=0;x<70;x++){
+    const dx=x-35, dy=y-35, d=Math.hypot(dx,dy); if(d>22) continue;
+    const luz=(-dx*0.7-dy*0.5)/22, faixa=Math.sin((y+dx*0.25)/2.6);
+    let c=luz>0.35?"#9E7CFF":luz>0?"#6B4FD1":luz>-0.4?"#45309A":"#271A5C";
+    if(faixa>0.6 && luz>-0.4) c=luz>0?"#B39AFF":"#5A41B5";
+    if(((x+y)&1) && luz>-0.45 && luz<-0.35) c="#271A5C";
+    g.fillStyle=c; g.fillRect(x,y,1,1);
+  }
+  g.strokeStyle="#FFC24A"; g.lineWidth=1;
+  for(let a=0;a<Math.PI*2;a+=0.01){ const x=35+Math.cos(a)*33, y=35+Math.sin(a)*8*Math.cos(0.2)+Math.cos(a)*-6;
+    const frente=Math.sin(a)>0; if(!frente && Math.hypot(x-35,y-35)<22) continue; g.fillStyle=frente?"#FFC24A":"#B9852E"; g.fillRect(Math.round(x),Math.round(y),1,1); }
+});
+const TERRA=sprite(26,26,g=>{
+  for(let y=0;y<26;y++) for(let x=0;x<26;x++){ const dx=x-13,dy=y-13,d=Math.hypot(dx,dy); if(d>12) continue;
+    const luz=(-dx-dy)/17, ter=Math.sin(x*0.9+y*0.4)+Math.cos(y*0.7-x*0.3)>0.9;
+    g.fillStyle=ter?(luz>0?"#5FBF6A":"#2F7A3A"):(luz>0.2?"#5B8CFF":luz>-0.3?"#3B6FE0":"#1C3A8A"); g.fillRect(x,y,1,1); }
+  g.fillStyle="rgba(255,255,255,.8)"; g.fillRect(8,6,4,1); g.fillRect(14,15,5,1);
+});
+
+/* ---------- estado ---------- */
+const E={ modo:"inicio", t:0, vel:0, dist:0, rec:0, coletadas:new Set(), proxCarta:0, obst:[], itens:[], part:[], tremor:0, inv:0, fundoX:0, prox:0, proxEstrela:0 };
+const A={ x:34, y:0, vy:0, w:12, h:15, noChao:true, segurando:false, tSegura:0, mergulho:false, frame:0 };
+
+function redimensionar(){
+  const vw=innerWidth, vh=innerHeight;
+  const retrato = vw<vh;
+  ESC=Math.max(2, Math.round(Math.min(vh/200, vw/240)));
+  if(retrato) ESC=Math.max(2, Math.floor(vw/125));
+  W=Math.ceil(vw/ESC); H=Math.ceil(vh/ESC);
+  CHAO=H-Math.max(22, Math.round(H*(retrato?0.26:0.12)));
+  FV=Math.min(1, Math.max(0.68, W/320));   // tela estreita: o jogo fica um pouco mais lento
+  $("dicaGire").hidden=!retrato;
+  const dpr=1; cv.width=W*dpr; cv.height=H*dpr; ctx.imageSmoothingEnabled=false;
+  montarCenario();
+  if(A.noChao) A.y=CHAO-A.h;
+  A.x=Math.max(24, Math.round(W*0.12));
+  if(E.modo!=="jogando") desenhar();
+}
+addEventListener("resize", redimensionar);
+
+function reiniciar(){
+  E.t=0; E.vel=105; E.dist=0; E.obst=[]; E.itens=[]; E.part=[]; E.tremor=0; E.inv=0; E.prox=60; E.proxEstrela=rnd(9,13);
+  A.y=CHAO-A.h; A.vy=0; A.noChao=true; A.segurando=false; A.mergulho=false;
+  atualizaHud();
+}
+
+/* ---------- som (8 bits, gerado na hora) ---------- */
+let audio=null, somLigado=true;
+function bip(freq, dur, tipo="square", vol=0.05, desliza=0){
+  if(!somLigado) return;
+  try{
+    audio = audio || new (window.AudioContext||window.webkitAudioContext)();
+    const o=audio.createOscillator(), g=audio.createGain(), t=audio.currentTime;
+    o.type=tipo; o.frequency.setValueAtTime(freq,t); if(desliza) o.frequency.exponentialRampToValueAtTime(Math.max(40,freq+desliza),t+dur);
+    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g).connect(audio.destination); o.start(t); o.stop(t+dur);
+  }catch(e){}
+}
+const SOM={ pulo:()=>bip(330,0.12,"square",0.04,260), estrela:()=>{bip(880,0.08);setTimeout(()=>bip(1320,0.12),80);setTimeout(()=>bip(1760,0.16),160);},
+  batida:()=>{bip(180,0.35,"sawtooth",0.07,-140);bip(90,0.4,"triangle",0.08,-50);}, marco:()=>bip(660,0.07,"square",0.03) };
+
+/* ---------- controles ---------- */
+function apertar(){
+  if(E.modo==="inicio"||E.modo==="fim"){ comecar(); return; }
+  if(E.modo!=="jogando") return;
+  A.segurando=true;
+  if(A.noChao){ A.vy=-215; A.noChao=false; A.tSegura=0; A.mergulho=false; SOM.pulo(); jato(8); }
+}
+function soltar(){ A.segurando=false; }
+function mergulhar(){ if(E.modo==="jogando" && !A.noChao){ A.mergulho=true; A.vy=Math.max(A.vy,140); } }
+
+addEventListener("keydown",e=>{
+  if(cartaAberta()){ if(e.code==="Space"||e.code==="Enter"){ e.preventDefault(); fecharCarta(); } return; }
+  if(e.code==="Space"||e.code==="ArrowUp"||e.code==="KeyW"){ e.preventDefault(); if(!e.repeat) apertar(); }
+  else if(e.code==="ArrowDown"||e.code==="KeyS"){ e.preventDefault(); mergulhar(); }
+  else if(e.code==="KeyP"||e.code==="Escape"){ alternarPausa(); }
+});
+addEventListener("keyup",e=>{ if(e.code==="Space"||e.code==="ArrowUp"||e.code==="KeyW") soltar(); });
+let toqueY=null;
+cv.addEventListener("pointerdown",e=>{ e.preventDefault(); toqueY=e.clientY; apertar(); });
+cv.addEventListener("pointermove",e=>{ if(toqueY!==null && e.clientY-toqueY>40){ mergulhar(); toqueY=null; } });
+addEventListener("pointerup",()=>{ toqueY=null; soltar(); });
+addEventListener("pointercancel",()=>{ toqueY=null; soltar(); });
+
+function comecar(){ fecharTelas(); reiniciar(); E.modo="jogando"; ultimo=performance.now(); }
+function fecharTelas(){ ["inicio","fim","pausa"].forEach(id=>delete $(id).dataset.open); }
+function alternarPausa(){
+  if(E.modo==="jogando"){ E.modo="pausa"; $("pausa").dataset.open=""; $("resumeBtn").focus(); }
+  else if(E.modo==="pausa"){ delete $("pausa").dataset.open; E.modo="jogando"; ultimo=performance.now(); }
+}
+$("startBtn").addEventListener("click",comecar);
+$("againBtn").addEventListener("click",comecar);
+$("resumeBtn").addEventListener("click",alternarPausa);
+$("pauseBtn").addEventListener("click",alternarPausa);
+$("somBtn").addEventListener("click",()=>{ somLigado=!somLigado; $("somBtn").setAttribute("aria-pressed",somLigado);
+  $("somBtn").setAttribute("aria-label",somLigado?"Desligar som":"Ligar som"); $("ondas").style.display=somLigado?"":"none"; });
+$("menuBtn").addEventListener("click",()=>{ const m=$("menu"), abre=!m.hasAttribute("data-open");
+  if(abre){ m.dataset.open=""; if(E.modo==="jogando") alternarPausa(); } else delete m.dataset.open;
+  $("menuBtn").setAttribute("aria-expanded",abre); });
+$("partnerLink").addEventListener("click",e=>{ if(e.currentTarget.hasAttribute("data-pending")) e.preventDefault(); });
+
+/* ---------- partículas ---------- */
+function jato(n){ for(let i=0;i<n;i++) E.part.push({x:A.x+2,y:A.y+A.h-3,vx:rnd(-60,-20),vy:rnd(10,60),v:rnd(.25,.5),c:Math.random()<.5?PAL.laranja:PAL.ouro}); }
+function brilhos(x,y,n,cores){ for(let i=0;i<n;i++){ const a=rnd(0,6.28), s=rnd(30,110); E.part.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,v:rnd(.4,.9),c:cores[rint(0,cores.length-1)]}); } }
+
+/* ---------- carta estelar ---------- */
+const cartaAberta=()=>$("cardwrap").hasAttribute("data-open");
+function abrirCarta(){
+  const faltam=CARTAS.filter(c=>!E.coletadas.has(c.id));
+  const nova=faltam.length>0;
+  const c=nova?faltam[0]:CARTAS[rint(0,CARTAS.length-1)];
+  E.coletadas.add(c.id);
+  $("cNova").textContent=nova?`NOVA CARTA! ${E.coletadas.size}/${CARTAS.length}`:"CARTA REPETIDA, MAS VALE RELER!";
+  $("cTitulo").textContent=c.nome;
+  $("cMeta").innerHTML=c.meta.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("");
+  $("cFatos").innerHTML=c.fatos.map(f=>`<li>${f}</li>`).join("");
+  $("cFonte").textContent="Fonte: "+c.fonte;
+  desenharArte($("cArte"), c.arte);
+  const foto=$("cFoto"); foto.hidden=true; foto.alt="Foto: "+c.nome;
+  foto.onload=()=>{ foto.hidden=false; }; foto.onerror=()=>{ foto.hidden=true; }; foto.src=c.foto;
+  E.modo="carta"; $("cardwrap").dataset.open=""; $("contBtn").focus();
+  atualizaHud();
+}
+function fecharCarta(){ delete $("cardwrap").dataset.open; E.modo="jogando"; E.inv=1.2; ultimo=performance.now(); }
+$("contBtn").addEventListener("click",fecharCarta);
+
+// ilustrações em pixel art para as cartas (96x60)
+function esfera(g,cx,cy,r,cores,faixas=0){
+  for(let y=-r;y<=r;y++) for(let x=-r;x<=r;x++){
+    const d=Math.hypot(x,y); if(d>r) continue;
+    let luz=(-x*0.7-y*0.6)/r + (faixas?0.25*Math.sin((y+cy)*faixas):0);
+    const i=luz>0.45?0:luz>0.05?1:luz>-0.35?2:3;
+    let c=cores[i]; if(i<3 && ((x+y)&1) && luz-([0.45,0.05,-0.35][i])<0.08) c=cores[i+1];
+    g.fillStyle=c; g.fillRect(cx+x,cy+y,1,1);
+  }
+}
+function brilhoAo(g,cx,cy,r,cor){ for(let k=r;k>0;k-=2){ g.globalAlpha=0.06; g.fillStyle=cor; g.beginPath(); g.arc(cx,cy,k,0,7); g.fill(); } g.globalAlpha=1; }
+function desenharArte(c, tipo){
+  const g=c.getContext("2d"); g.imageSmoothingEnabled=false;
+  g.fillStyle="#02030a"; g.fillRect(0,0,96,60);
+  for(let i=0;i<40;i++){ g.fillStyle=["#FFF4DC","#C8D7FF","#8B7CFF"][i%3]; g.fillRect(rint(0,95),rint(0,59),1,1); }
+  const quentes=["#FFD08A","#FF7A33","#C2340F","#5C1205"];
+  if(tipo==="anaVermelha"){ brilhoAo(g,48,30,26,"#FF5A2A"); esfera(g,48,30,13,["#FFB27A","#E2471D","#9A220B","#4A0B03"]); }
+  else if(tipo==="anaMarrom"){ esfera(g,48,30,15,["#C9714A","#8A3A22","#5A2416","#2A0D07"],0.9); }
+  else if(tipo==="duplaMarrom"){ esfera(g,38,30,10,["#D07A50","#8A3A22","#5A2416","#2A0D07"],1.1); esfera(g,62,34,7,["#B8603C","#7A301C","#4A1C10","#200A05"],1.3);
+    g.fillStyle="#FFF4DC"; g.fillRect(84,10,2,2); brilhoAo(g,85,11,8,"#FFE9B0"); }
+  else if(tipo==="gigante"){ brilhoAo(g,48,30,34,"#FF8A2A"); esfera(g,48,30,20,quentes); }
+  else if(tipo==="jovem"){ g.globalAlpha=1;
+    for(let i=0;i<260;i++){ const a=rnd(0,6.28), d=Math.pow(Math.random(),0.6)*34; const x=48+Math.cos(a)*d, y=30+Math.sin(a)*d*0.35;
+      g.fillStyle=["#5B7BFF","#8B7CFF","#FF9A55","#FFC24A"][rint(0,3)]; g.globalAlpha=0.55; g.fillRect(x|0,y|0,1,1); }
+    g.globalAlpha=1; brilhoAo(g,48,30,14,"#FFFFFF"); g.fillStyle="#FFFFFF"; g.fillRect(47,29,3,3); g.fillRect(44,30,9,1); g.fillRect(48,26,1,9); }
+  else if(tipo==="sedna"){ esfera(g,48,30,11,["#E8805C","#B9472D","#7A2616","#3A0F08"]); g.fillStyle="#FFC24A"; g.fillRect(4,52,3,3); }
+  else if(tipo==="planetaX"){ brilhoAo(g,48,30,28,"#8B7CFF"); esfera(g,48,30,15,["#B39AFF","#6B4FD1","#45309A","#1F1450"],0.7);
+    g.fillStyle="#FFF4DC"; [[46,24],[47,23],[48,23],[49,23],[50,24],[50,25],[49,26],[48,27],[48,28],[48,30]].forEach(([x,y])=>g.fillRect(x,y,1,1)); }
+  else if(tipo==="telescopio"){
+    for(let i=0;i<300;i++){ g.globalAlpha=0.4; g.fillStyle=["#8B7CFF","#5B7BFF","#FF66C4"][rint(0,2)]; const a=rnd(0,6.28),d=rnd(0,40); g.fillRect((70+Math.cos(a)*d)|0,(20+Math.sin(a)*d*0.6)|0,1,1); }
+    g.globalAlpha=1;
+    [[18,"#E6E8F0"],[15,"#C9CBD6"],[12,"#A9ABB8"]].forEach(([w,c],k)=>{ g.fillStyle=c; for(let y=0;y<16;y++){ const ww=Math.round(w*(0.55+0.45*y/16)); g.fillRect(36-ww+k,16+y+k*1,ww*2-k*2,1); } });
+    g.fillStyle="#3A3748"; g.fillRect(26,34,20,8); g.fillStyle="#1C3A8A"; g.fillRect(10,30,14,12); g.fillStyle="#3B6FE0"; for(let x=10;x<24;x+=3) g.fillRect(x,30,1,12);
+    g.fillStyle="#FFC24A"; g.fillRect(33,20,6,2);
+  }
+}
+
+/* ---------- atualização ---------- */
+function atualizaHud(){
+  const f=n=>String(Math.floor(n)).padStart(5,"0");
+  $("hDist").textContent=f(E.dist); $("hRec").textContent=f(E.rec); $("hCartas").textContent=`${E.coletadas.size}/${CARTAS.length}`;
+}
+
+function gerarObstaculo(){
+  const pega=()=>ASTEROIDES[rint(0,ASTEROIDES.length-1)];
+  const chao=(spr,dx=0)=>E.obst.push({x:W+spr.width+dx, y:CHAO-spr.height+2, spr, w:spr.width, h:spr.height, rot:0, osc:0});
+  const sorte=Math.random();
+  if(E.dist<150 || sorte<0.55){              // 0: asteroide rolando no chão: pule por cima
+    const spr=pega(); chao(spr);
+    if(E.dist>400 && Math.random()<0.3) chao(pega(), spr.width+2);
+  } else if(E.dist<500 || sorte<0.8){        // 1: asteroide flutuando: fique no chão (ou pule baixinho)
+    const spr=pega();
+    E.obst.push({x:W+spr.width, y:CHAO-A.h-spr.height-rint(16,24), spr, w:spr.width, h:spr.height, rot:0, osc:rnd(0,6), oscA:E.dist>700?rnd(1,3):0});
+  } else {                                    // 2: combinação: pulo curto (toque rápido) entre os dois
+    const baixo=pega(), alto=ASTEROIDES[rint(0,4)];
+    chao(baixo);
+    E.obst.push({x:W+baixo.width+(baixo.width-alto.width)/2, y:CHAO-60-alto.height, spr:alto, w:alto.width, h:alto.height, rot:0, osc:0});
+    E.prox+=40;
+  }
+}
+
+function colide(a,b,m){ return a.x+m<b.x+b.w-m && a.x+a.w-m>b.x+m && a.y+m<b.y+b.h-m && a.y+a.h-m>b.y+m; }
+
+function passo(dt){
+  E.t+=dt; E.vel=Math.min(270, 105+E.dist*0.045)*FV; E.dist+=E.vel*dt*0.1;
+  E.fundoX+=E.vel*dt;
+  if(E.inv>0) E.inv-=dt;
+  const antes=Math.floor((E.dist-E.vel*dt*0.1)/100), agora=Math.floor(E.dist/100);
+  if(agora>antes) SOM.marco();
+
+  // astronauta: jato com gravidade lunar
+  if(!A.noChao){
+    let gr=620;
+    if(A.segurando && A.vy<0 && A.tSegura<0.28){ gr=230; A.tSegura+=dt; if(Math.random()<0.6) jato(1); }
+    if(A.mergulho) gr=1900;
+    A.vy+=gr*dt; A.y+=A.vy*dt;
+    if(A.y>=CHAO-A.h){ A.y=CHAO-A.h; A.vy=0; A.noChao=true; A.mergulho=false; brilhos(A.x+6,CHAO,4,["#6E6A80","#A9A3B8"]); }
+    if(A.y<14){ A.y=14; A.vy=Math.max(0,A.vy); }
+  }
+  A.frame+=dt*E.vel/18;
+
+  // obstáculos
+  E.prox-=E.vel*dt;
+  if(E.prox<=0){ E.prox=rnd(Math.max(70,E.vel*0.62), Math.max(130,E.vel*1.25)); gerarObstaculo(); }
+  E.obst.forEach(o=>{ o.x-=E.vel*dt*(o.y<CHAO-30?1.08:1); o.rot+=dt*4; if(o.oscA){ o.osc+=dt*3; o.y+=Math.sin(o.osc)*o.oscA*dt*4; } });
+  E.obst=E.obst.filter(o=>o.x>-o.w-4);
+
+  // estrelas douradas (checkpoint com carta)
+  E.proxEstrela-=dt;
+  if(E.proxEstrela<=0){
+    const y=CHAO-rint(30,52);
+    E.itens.push({x:W+10, y, w:13, h:13, f:0});
+    E.proxEstrela=rnd(11,16);
+  }
+  E.itens.forEach(it=>{ it.x-=E.vel*dt; it.f+=dt*10; });
+  E.itens=E.itens.filter(it=>it.x>-20);
+
+  const corpo={x:A.x, y:A.y, w:A.w, h:A.h};
+  for(const it of E.itens){
+    if(colide(corpo,it,0)){ it.x=-99; brilhos(A.x+6,A.y+4,22,[PAL.ouro,"#FFF4DC",PAL.laranja]); SOM.estrela(); abrirCarta(); return; }
+  }
+  if(E.inv<=0) for(const o of E.obst){ if(colide(corpo,o,3)){ bater(); return; } }
+
+  E.part.forEach(p=>{ p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=40*dt; p.v-=dt; });
+  E.part=E.part.filter(p=>p.v>0);
+  if(E.tremor>0) E.tremor-=dt;
+  atualizaHud();
+}
+
+function bater(){
+  SOM.batida(); E.tremor=calmo?0:0.35;
+  brilhos(A.x+6,A.y+7,40,[PAL.laranja,PAL.ouro,"#FFF4DC","#8C85A0"]);
+  E.modo="caindo"; E.rec=Math.max(E.rec,E.dist); atualizaHud();
+  setTimeout(()=>{
+    E.modo="fim";
+    $("fimTexto").textContent=`Você percorreu ${Math.floor(E.dist)} mil km e encontrou ${E.coletadas.size} de ${CARTAS.length} cartas.`;
+    $("album").innerHTML=CARTAS.map(c=>`<span class="${E.coletadas.has(c.id)?"got":""}">${E.coletadas.has(c.id)?c.nome:"???"}</span>`).join("");
+    $("fim").dataset.open=""; $("againBtn").focus();
+  }, 900);
+}
+
+/* ---------- desenho ---------- */
+function desenhar(){
+  ctx.save();
+  if(E.tremor>0){ ctx.translate(rint(-2,2),rint(-2,2)); }
+  // céu
+  const grad=ctx.createLinearGradient(0,0,0,CHAO); grad.addColorStop(0,"#000"); grad.addColorStop(1,"#0B0820");
+  ctx.fillStyle=grad; ctx.fillRect(-4,-4,W+8,H+8);
+  // nebulosa pontilhada
+  for(let i=0;i<3;i++){ const nx=((W*0.3+i*W*0.45 - E.fundoX*0.02)%(W*1.4)+W*1.4)%(W*1.4)-W*0.2, ny=H*(0.18+i*0.12);
+    ctx.fillStyle=i===1?"rgba(59,111,224,.07)":"rgba(139,124,255,.08)"; ctx.beginPath(); ctx.ellipse(nx,ny,W*0.22,H*0.08,0,0,7); ctx.fill(); }
+  // estrelas
+  for(const s of estrelasFundo){
+    const x=((s.x - E.fundoX*s.z)%W+W)%W;
+    const pisca=calmo?1:(Math.sin(E.t*2+s.f)>-0.6?1:0.35);
+    ctx.globalAlpha=pisca; ctx.fillStyle=s.c; ctx.fillRect(x|0,s.y|0,1,1);
+  }
+  ctx.globalAlpha=1;
+  // planeta e Terra ao longe
+  const px=((W*0.72 - E.fundoX*0.01)%(W+90)+W+90)%(W+90)-70;
+  ctx.drawImage(PLANETA, px|0, Math.round(H*0.08));
+  const tx=((W*0.25 - E.fundoX*0.025)%(W+40)+W+40)%(W+40)-26;
+  ctx.drawImage(TERRA, tx|0, Math.round(CHAO*0.42));
+  // solo lunar
+  ctx.fillStyle="#2A2638"; ctx.fillRect(0,CHAO,W,H-CHAO);
+  ctx.fillStyle="#6E6A80"; ctx.fillRect(0,CHAO,W,1);
+  ctx.fillStyle="#4A4560"; ctx.fillRect(0,CHAO+1,W,1);
+  const off=E.fundoX%(W+40);
+  for(const c of solo){
+    const x=((c.x-off)%(W+40)+W+40)%(W+40)-20;
+    ctx.fillStyle="#1C1928"; ctx.fillRect(x|0,CHAO+3+c.t*4,c.r*2,Math.max(1,c.r/2));
+    ctx.fillStyle="#4A4560"; ctx.fillRect(x|0,CHAO+3+c.t*4+Math.max(1,c.r/2),c.r*2,1);
+  }
+  for(let x=0;x<W;x+=4){ const xx=((x - E.fundoX*1)%W+W)%W; if((x*7)%13<2){ ctx.fillStyle="#3A3550"; ctx.fillRect(xx|0,CHAO+2,1,1);} }
+  // estrelas douradas
+  for(const it of E.itens){
+    ctx.globalAlpha=0.25; ctx.fillStyle=PAL.ouro; ctx.beginPath(); ctx.arc(it.x+6,it.y+6,9+Math.sin(it.f)*2,0,7); ctx.fill(); ctx.globalAlpha=1;
+    ctx.drawImage(ESTRELA[Math.floor(it.f)%4], it.x|0, (it.y+Math.sin(it.f*0.5)*2)|0);
+  }
+  // asteroides (com rotação em passos de 90°, para manter o pixel art nítido)
+  for(const o of E.obst){
+    ctx.save(); ctx.translate((o.x+o.w/2)|0,(o.y+o.h/2)|0); ctx.rotate(Math.floor(o.rot)%4*Math.PI/2*-1);
+    ctx.drawImage(o.spr,-o.w/2|0,-o.h/2|0); ctx.restore();
+  }
+  // partículas
+  for(const p of E.part){ ctx.globalAlpha=Math.min(1,p.v*2); ctx.fillStyle=p.c; ctx.fillRect(p.x|0,p.y|0,1,1); }
+  ctx.globalAlpha=1;
+  // astronauta
+  if(E.modo!=="caindo" && E.modo!=="fim" || E.modo==="inicio"){
+    if(!(E.inv>0 && Math.floor(E.t*12)%2)){
+      const spr=A.noChao?ASTRO[Math.floor(A.frame)%2]:ASTRO_CAI;
+      ctx.drawImage(spr, A.x|0, A.y|0);
+      if(!A.noChao && A.segurando){ ctx.fillStyle=Math.random()<.5?PAL.laranja:PAL.ouro; ctx.fillRect((A.x+1)|0,(A.y+11)|0,1,2+rint(0,2)); }
+    }
+  }
+  ctx.restore();
+}
+
+/* ---------- laço principal ---------- */
+let ultimo=performance.now();
+function loop(agora){
+  let dt=Math.min(0.05,(agora-ultimo)/1000); ultimo=agora;
+  if(E.modo==="jogando") passo(dt);
+  else if(E.modo==="caindo"){ E.part.forEach(p=>{ p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=40*dt; p.v-=dt; }); E.part=E.part.filter(p=>p.v>0); if(E.tremor>0) E.tremor-=dt; }
+  else if(E.modo==="inicio" && !calmo){ E.fundoX+=20*dt; E.t+=dt; A.frame+=dt*4; }
+  desenhar();
+  requestAnimationFrame(loop);
+}
+redimensionar(); reiniciar(); E.modo="inicio";
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

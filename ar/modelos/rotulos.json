@@ -1,0 +1,141 @@
+{
+ "spherex": [
+  {
+   "id": "escudos",
+   "pos": "0.600 1.000 0.350",
+   "label": "Escudos"
+  },
+  {
+   "id": "telescopio",
+   "pos": "0.000 0.800 0.000",
+   "label": "Telescópio"
+  }
+ ],
+ "spitzer": [],
+ "ceu": [
+  {
+   "id": "polo",
+   "pos": "-0.159 0.840 0.000",
+   "label": "Polo norte celeste"
+  }
+ ],
+ "sistema-solar": [
+  {
+   "id": "Mercúrio",
+   "pos": "-0.745 0.355 0.000",
+   "label": "Mercúrio"
+  },
+  {
+   "id": "Vênus",
+   "pos": "-0.609 0.405 0.000",
+   "label": "Vênus"
+  },
+  {
+   "id": "Terra",
+   "pos": "-0.466 0.355 0.000",
+   "label": "Terra"
+  },
+  {
+   "id": "Marte",
+   "pos": "-0.328 0.405 0.000",
+   "label": "Marte"
+  },
+  {
+   "id": "Júpiter",
+   "pos": "-0.117 0.460 0.000",
+   "label": "Júpiter"
+  },
+  {
+   "id": "Saturno",
+   "pos": "0.201 0.468 0.000",
+   "label": "Saturno"
+  },
+  {
+   "id": "Urano",
+   "pos": "0.533 0.373 0.000",
+   "label": "Urano"
+  },
+  {
+   "id": "Netuno",
+   "pos": "0.697 0.372 0.000",
+   "label": "Netuno"
+  }
+ ],
+ "terra-lua": [
+  {
+   "id": "terra",
+   "pos": "-0.300 0.420 0.100",
+   "label": "Terra"
+  },
+  {
+   "id": "lua",
+   "pos": "0.450 0.560 0.000",
+   "label": "Lua"
+  }
+ ],
+ "marte": [
+  {
+   "id": "calota",
+   "pos": "-0.085 0.500 0.000",
+   "label": "Calota polar"
+  }
+ ],
+ "jupiter": [
+  {
+   "id": "faixas",
+   "pos": "0.000 0.490 0.240",
+   "label": "Faixas de nuvens"
+  }
+ ],
+ "saturno": [
+  {
+   "id": "aneis",
+   "pos": "0.400 0.450 0.100",
+   "label": "Anéis"
+  },
+  {
+   "id": "divisao",
+   "pos": "-0.390 0.600 0.000",
+   "label": "Divisão de Cassini"
+  }
+ ],
+ "planeta-x": [
+  {
+   "id": "2012-vp113",
+   "pos": "-0.549 0.607 0.265",
+   "label": "2012 VP113"
+  },
+  {
+   "id": "planeta-x",
+   "pos": "0.171 0.289 -0.630",
+   "label": "Planeta X"
+  },
+  {
+   "id": "sedna",
+   "pos": "0.146 0.568 1.317",
+   "label": "Sedna"
+  },
+  {
+   "id": "sol",
+   "pos": "0.000 0.370 0.000",
+   "label": "Sol"
+  }
+ ],
+ "tamanho": [
+  {
+   "id": "terra",
+   "pos": "-0.520 0.220 0.000",
+   "label": "Terra"
+  },
+  {
+   "id": "px",
+   "pos": "-0.200 0.364 0.000",
+   "label": "Planeta X"
+  },
+  {
+   "id": "netuno",
+   "pos": "0.380 0.566 0.000",
+   "label": "Netuno"
+  }
+ ]
+}

@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AstroByte AR: o universo na sua câmera</title>
+<meta name="description" content="Dez experiências de realidade aumentada no navegador: missões da NASA, planetas e a hipótese do Planeta X.">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="../comum/logo-topo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Exo+2:ital,wght@0,600;0,700;1,700&display=swap" rel="stylesheet">
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+<style>
+/* Paleta tirada da logo: creme, dourado e laranja sobre o preto do espaço.
+   A página é sempre escura, nos dois modos do sistema, porque o céu é a identidade do AstroByte. */
+:root, :root[data-theme="light"], :root[data-theme="dark"]{
+  --space:#000; --ink:#FFF4DC; --muted:#B9B3C9; --line:rgba(255,244,220,.14);
+  --gold:#FFC24A; --orange:#F7931E; --nebula:#5B3FD1; --nebula-2:#1F5FBF;
+  --glass:rgba(8,9,22,.72); --glass-strong:rgba(8,9,22,.9); --button-ink:#1A1004;
+  --display:"Exo 2","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  color-scheme:dark; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ color-scheme:dark } }
+html{min-height:100%; background:#000; scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0; min-height:100%; background:transparent; color:var(--ink); font:400 .95rem/1.5 var(--body)}
+a{color:inherit}
+button{font:inherit}
+
+/* ---------- céu: estrelas (canvas) + nebulosas suaves ---------- */
+#ceu{position:fixed; inset:0; width:100%; height:100%; z-index:-1; display:block; background:#000}
+.nebula{position:fixed; inset:-20%; z-index:-1; pointer-events:none; opacity:.55;
+  background:
+    radial-gradient(38% 30% at 22% 28%, rgba(91,63,209,.28), transparent 70%),
+    radial-gradient(30% 26% at 78% 70%, rgba(31,95,191,.22), transparent 70%),
+    radial-gradient(26% 18% at 64% 18%, rgba(247,147,30,.10), transparent 70%);
+  animation:deriva 90s ease-in-out infinite alternate}
+@keyframes deriva{ from{transform:translate3d(-2%,-1%,0) rotate(0deg)} to{transform:translate3d(2%,1.5%,0) rotate(4deg)} }
+
+/* ---------- topo e menu ---------- */
+.top{position:relative; z-index:20; display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:8px 16px; border-bottom:1px solid var(--line); background:linear-gradient(to bottom, rgba(0,0,0,.85), rgba(0,0,0,.4))}
+.logo{display:block; line-height:0}
+.logo img{height:46px; width:auto}
+.menu-btn{display:none; align-items:center; gap:.4rem; padding:.45rem .8rem; border:1px solid var(--line); border-radius:999px;
+  background:transparent; color:var(--ink); cursor:pointer; font:600 .9rem/1 var(--display)}
+.menu-btn svg{width:18px; height:18px}
+.menu{display:flex; align-items:center; gap:4px}
+.menu a, .menu .soon{display:block; padding:.5rem .8rem; border-radius:999px; text-decoration:none; font:600 .92rem/1.1 var(--display); color:var(--muted)}
+.menu a:hover{color:var(--ink); background:rgba(255,244,220,.07)}
+.menu a[aria-current="page"]{color:var(--button-ink); background:var(--gold)}
+.menu .sep{width:1px; height:24px; margin:0 8px; background:var(--line)}
+.menu .partner{display:flex; align-items:center; gap:4px}
+.menu .partner small{color:var(--muted); font-size:.72rem; margin-right:2px}
+.menu .soon{opacity:.6; cursor:default}
+@media (max-width:760px){
+  .menu-btn{display:inline-flex}
+  .menu{display:none; position:absolute; right:12px; top:calc(100% + 6px); flex-direction:column; align-items:stretch; gap:2px;
+    min-width:230px; padding:8px; border:1px solid var(--line); border-radius:14px; background:var(--glass-strong); backdrop-filter:blur(12px)}
+  .menu[data-open]{display:flex}
+  .menu .sep{width:auto; height:1px; margin:6px 4px}
+  .menu .partner{flex-direction:column; align-items:stretch}
+  .menu .partner small{padding:.2rem .8rem 0}
+  .menu a, .menu .soon{border-radius:10px}
+}
+
+/* ---------- área principal ---------- */
+.app{display:grid; grid-template-rows:minmax(62vh,1fr) auto}
+@media (min-width:960px){ .app{grid-template-columns:1fr 360px; grid-template-rows:none; height:calc(100vh - 63px); min-height:560px} }
+.stage{position:relative; min-height:62vh}
+model-viewer{position:absolute; inset:0; width:100%; height:100%; background:transparent; --poster-color:transparent}
+.stepper{position:absolute; top:10px; right:10px; z-index:3; display:flex; gap:6px}
+.stepper button{width:38px; height:38px; border-radius:50%; border:1px solid var(--line); background:var(--glass); color:var(--ink); cursor:pointer; font-size:1.2rem; line-height:1}
+.ar-btn{position:absolute; left:50%; bottom:18px; transform:translateX(-50%); z-index:3; display:flex; align-items:center; gap:.5rem;
+  padding:.8rem 1.3rem; border:0; border-radius:999px; background:linear-gradient(90deg,var(--gold),var(--orange)); color:var(--button-ink);
+  font:700 1rem/1 var(--display); cursor:pointer; white-space:nowrap; box-shadow:0 0 28px rgba(247,147,30,.45); animation:respira 3.6s ease-in-out infinite}
+@keyframes respira{ 50%{ box-shadow:0 0 42px rgba(255,194,74,.7) } }
+.ar-btn svg{width:20px; height:20px}
+.no-ar{position:absolute; left:50%; bottom:16px; transform:translateX(-50%); margin:0; padding:.5rem .9rem; border-radius:10px;
+  background:var(--glass); font-size:.85rem; text-align:center; width:max-content; max-width:90%; z-index:3}
+.progress{position:absolute; inset:0 0 auto 0; height:3px; z-index:4}
+.progress span{display:block; height:100%; width:0; background:var(--gold); transition:width .2s}
+
+.hotspot{display:flex; align-items:center; gap:.35rem; padding:0; border:0; background:none; color:var(--ink); cursor:pointer}
+.hotspot .dot{width:22px; height:22px; border-radius:50%; background:var(--gold); color:var(--button-ink);
+  display:grid; place-items:center; font:700 .85rem/1 var(--body); box-shadow:0 0 0 4px rgba(255,194,74,.25), 0 0 14px rgba(255,194,74,.6)}
+.hotspot .txt{padding:.2rem .45rem; border-radius:7px; background:var(--glass); font:700 .75rem/1.1 var(--body); white-space:nowrap}
+.hotspot[data-visible="false"]{opacity:.3}
+
+.ar-tip, .ar-info{display:none; position:absolute; left:50%; transform:translateX(-50%); z-index:5; width:max-content; max-width:calc(100% - 24px);
+  padding:.55rem .85rem; border-radius:12px; background:var(--glass-strong); color:var(--ink); font-size:.9rem; line-height:1.35; text-align:center}
+.ar-tip{top:calc(12px + env(safe-area-inset-top,0px))}
+.ar-info{bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+.ar-info strong{font-family:var(--display); color:var(--gold)}
+model-viewer[ar-status="session-started"] .ar-tip[data-open],
+model-viewer[ar-status="object-placed"] .ar-tip[data-open],
+model-viewer[ar-status="session-started"] .ar-info[data-open],
+model-viewer[ar-status="object-placed"] .ar-info[data-open]{display:block}
+
+.panel{background:var(--glass); backdrop-filter:blur(10px); border-top:1px solid var(--line); padding:14px 16px 22px; overflow:auto}
+@media (min-width:960px){ .panel{border-top:0; border-left:1px solid var(--line); padding:20px 22px 24px} }
+.scenes{display:flex; gap:6px; overflow-x:auto; margin:0 -16px 14px; padding:0 16px 4px; scroll-snap-type:x proximity}
+@media (min-width:960px){ .scenes{flex-wrap:wrap; overflow:visible; margin:0 0 16px; padding:0} }
+.scenes button{flex:0 0 auto; scroll-snap-align:start; padding:.4rem .7rem; border:1px solid var(--line); border-radius:999px;
+  background:rgba(255,244,220,.03); color:var(--ink); font:600 .82rem/1.1 var(--display); cursor:pointer}
+.scenes button:hover{border-color:rgba(255,194,74,.5)}
+.scenes button[aria-current="true"]{border-color:var(--gold); background:var(--gold); color:var(--button-ink)}
+
+h1{margin:0 0 .3rem; font:italic 700 1.45rem/1.15 var(--display); letter-spacing:.005em}
+.lead{margin:0 0 .9rem; color:var(--muted); max-width:46ch}
+.quick{display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin:0 0 .9rem}
+.quick div{padding:.5rem .6rem; border-radius:10px; background:rgba(255,244,220,.05); border:1px solid var(--line)}
+.quick dt{font-size:.72rem; color:var(--muted)}
+.quick dd{margin:.1rem 0 0; font:700 .92rem/1.2 var(--display); color:var(--gold)}
+.tip{display:flex; gap:.55rem; margin:0 0 .9rem; padding:.6rem .7rem; border-radius:10px; border:1px solid rgba(255,194,74,.35); font-size:.9rem}
+.tip svg{flex:0 0 18px; height:18px; margin-top:.1rem; color:var(--gold)}
+details{border-top:1px solid var(--line)}
+summary{padding:.7rem 0; cursor:pointer; font:700 .95rem/1.2 var(--display)}
+.more{padding:0 0 .4rem}
+.more h2{margin:.6rem 0 .25rem; font:700 .9rem/1.2 var(--display); color:var(--gold)}
+.more p, .more ul{margin:0 0 .5rem}
+.more ul{padding-left:1.1rem}
+.fact{margin:0 0 .45rem; padding:.5rem .65rem; border-radius:10px; background:rgba(255,244,220,.05); scroll-margin-top:10px}
+.fact.flash{outline:2px solid var(--gold)}
+.fact b{font-family:var(--display)}
+.source{font-size:.8rem; color:var(--muted)}
+
+/* ---------- rodapé ---------- */
+.foot{position:relative; z-index:1; padding:28px 16px calc(28px + env(safe-area-inset-bottom,0px)); border-top:1px solid var(--line);
+  background:linear-gradient(to top, rgba(0,0,0,.92), rgba(0,0,0,.5)); text-align:center}
+.foot img{height:64px; width:auto; margin:0 auto 12px; display:block}
+.social{display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin:0 0 14px; padding:0; list-style:none}
+.social a{display:inline-flex; align-items:center; gap:.45rem; padding:.5rem .85rem; border:1px solid var(--line); border-radius:999px;
+  text-decoration:none; font:600 .88rem/1 var(--display); color:var(--ink)}
+.social a:hover{border-color:var(--gold); color:var(--gold)}
+.social svg{width:16px; height:16px}
+.mail{margin:0 0 14px; font-size:.95rem}
+.mail a{color:var(--gold)}
+.credit{margin:0; color:var(--muted); font-size:.85rem; max-width:60ch; margin-inline:auto}
+button:focus-visible, a:focus-visible, summary:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
+@media (prefers-reduced-motion: reduce){ .nebula, .ar-btn{animation:none} .progress span{transition:none} }
+</style>
+</head>
+<body>
+<canvas id="ceu" aria-hidden="true"></canvas>
+<div class="nebula" aria-hidden="true"></div>
+
+<header class="top">
+  <a class="logo" href="../" aria-label="AstroByte, início"><img src="../comum/logo-topo.png" alt="AstroByte" width="73" height="46"></a>
+  <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu
+  </button>
+  <nav class="menu" id="menu" aria-label="Menu principal">
+    <a href="./" aria-current="page">Realidade aumentada</a>
+    <a href="../cartas/">Card game</a>
+    <a href="../jogo/">Jogo</a>
+    <span class="sep" aria-hidden="true"></span>
+    <!-- Espaço do site parceiro: troque o "#" pelo endereço e o texto pelo nome do site. -->
+    <div class="partner">
+      <small>Parceiro</small>
+      <a href="#" id="partnerLink" data-pending>Site parceiro</a>
+    </div>
+  </nav>
+</header>
+
+<main class="app">
+  <section class="stage" aria-label="Visualizador 3D">
+    <div class="stepper">
+      <button type="button" id="prev" aria-label="Experiência anterior">‹</button>
+      <button type="button" id="next" aria-label="Próxima experiência">›</button>
+    </div>
+    <model-viewer id="mv" ar ar-modes="webxr scene-viewer quick-look" ar-placement="floor" ar-scale="auto"
+      camera-controls touch-action="pan-y" shadow-intensity="0" environment-image="neutral" exposure="1.2"
+      autoplay interaction-prompt="auto" alt="Modelo 3D">
+      <button slot="ar-button" class="ar-btn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="m3 7 9 5 9-5M12 12v10"/></svg>
+        Ver no meu espaço
+      </button>
+      <div class="progress" slot="progress-bar"><span id="bar"></span></div>
+      <p class="ar-tip" id="arTip" role="status"></p>
+      <p class="ar-info" id="arInfo" role="status"></p>
+    </model-viewer>
+    <p class="no-ar" id="noAr" hidden>Abra no celular para ver na sua sala.</p>
+  </section>
+
+  <aside class="panel">
+    <nav aria-label="Experiências"><div class="scenes" id="scenes"></div></nav>
+    <h1 id="title"></h1>
+    <p class="lead" id="lead"></p>
+    <dl class="quick" id="quick"></dl>
+    <p class="tip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg><span id="tip"></span></p>
+    <details id="moreBox">
+      <summary>Saiba mais</summary>
+      <div class="more">
+        <div id="facts"></div>
+        <h2>Curiosidade</h2><p id="curio"></p>
+        <h2>Pense nisso</h2><p id="think"></p>
+        <h2>Como usar</h2>
+        <ul>
+          <li>Toque em <b>Ver no meu espaço</b> e aponte para o chão.</li>
+          <li>Um dedo arrasta. Dois dedos giram e mudam o tamanho.</li>
+          <li>Toque nos pontos dourados para ler sobre cada parte.</li>
+        </ul>
+        <p class="source" id="source"></p>
+      </div>
+    </details>
+  </aside>
+</main>
+
+<footer class="foot">
+  <img src="../comum/logo-topo.png" alt="AstroByte" width="101" height="64" loading="lazy">
+  <ul class="social" aria-label="Redes sociais do AstroByte">
+    <li><a href="https://www.youtube.com/@astrobyte.nasaspace" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="m10 9 5 3-5 3z" fill="currentColor"/></svg>YouTube</a></li>
+    <li><a href="https://www.instagram.com/astrobyte.nasa/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>Instagram</a></li>
+    <li><a href="https://www.tiktok.com/@astrobyte.nasa" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 3v11a4 4 0 1 1-4-4"/><path d="M14 3c.5 3 2.5 5 5 5"/></svg>TikTok</a></li>
+    <li><a href="https://x.com/astrobyte_nasa" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m4 4 16 16M20 4 4 20"/></svg>X</a></li>
+    <li><a href="https://www.facebook.com/profile.php?id=61596774111667" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h-2a4 4 0 0 0-4 4v14M6 11h8"/></svg>Facebook</a></li>
+  </ul>
+  <p class="mail">Fale com a gente: <a href="mailto:astrobyte.nasa@gmail.com">astrobyte.nasa@gmail.com</a></p>
+  <p class="credit">Página criada pela equipe AstroByte para o NASA Space Apps Challenge 2026. Imagens e dados científicos: NASA.</p>
+</footer>
+
+<script>
+const ORDEM = ["spherex","spitzer","ceu","sistema-solar","terra-lua","marte","jupiter","saturno","planeta-x","tamanho"];
+// .glb para Android e navegador; .usdz (com animação) para iPhone
+const MODELS = Object.fromEntries(ORDEM.map(id=>[id, `modelos/${id}.glb`]));
+const IOS = Object.fromEntries(ORDEM.map(id=>[id, `modelos/${id}.usdz`]));
+const HOTSPOTS = {"spherex": [{"id": "escudos", "pos": "0.600 1.000 0.350", "label": "Escudos"}, {"id": "telescopio", "pos": "0.000 0.800 0.000", "label": "Telescópio"}], "spitzer": [], "ceu": [{"id": "polo", "pos": "-0.159 0.840 0.000", "label": "Polo norte celeste"}], "sistema-solar": [{"id": "Mercúrio", "pos": "-0.745 0.355 0.000", "label": "Mercúrio"}, {"id": "Vênus", "pos": "-0.609 0.405 0.000", "label": "Vênus"}, {"id": "Terra", "pos": "-0.466 0.355 0.000", "label": "Terra"}, {"id": "Marte", "pos": "-0.328 0.405 0.000", "label": "Marte"}, {"id": "Júpiter", "pos": "-0.117 0.460 0.000", "label": "Júpiter"}, {"id": "Saturno", "pos": "0.201 0.468 0.000", "label": "Saturno"}, {"id": "Urano", "pos": "0.533 0.373 0.000", "label": "Urano"}, {"id": "Netuno", "pos": "0.697 0.372 0.000", "label": "Netuno"}], "terra-lua": [{"id": "terra", "pos": "-0.300 0.420 0.100", "label": "Terra"}, {"id": "lua", "pos": "0.450 0.560 0.000", "label": "Lua"}], "marte": [{"id": "calota", "pos": "-0.085 0.500 0.000", "label": "Calota polar"}], "jupiter": [{"id": "faixas", "pos": "0.000 0.490 0.240", "label": "Faixas de nuvens"}], "saturno": [{"id": "aneis", "pos": "0.400 0.450 0.100", "label": "Anéis"}, {"id": "divisao", "pos": "-0.390 0.600 0.000", "label": "Divisão de Cassini"}], "planeta-x": [{"id": "2012-vp113", "pos": "-0.549 0.607 0.265", "label": "2012 VP113"}, {"id": "planeta-x", "pos": "0.171 0.289 -0.630", "label": "Planeta X"}, {"id": "sedna", "pos": "0.146 0.568 1.317", "label": "Sedna"}, {"id": "sol", "pos": "0.000 0.370 0.000", "label": "Sol"}], "tamanho": [{"id": "terra", "pos": "-0.520 0.220 0.000", "label": "Terra"}, {"id": "px", "pos": "-0.200 0.364 0.000", "label": "Planeta X"}, {"id": "netuno", "pos": "0.380 0.566 0.000", "label": "Netuno"}]};
+const ONLY_DOT = ["sistema-solar","planeta-x","tamanho","terra-lua"];  // o nome já está escrito no 3D
+
+const NASA = 'Imagens: NASA (NASA 3D Resources e Blue Marble). Dados: NASA Planetary Fact Sheet.';
+
+/* fichas curtas: [título, texto] */
+const F = {
+  mercurio:["Mercúrio","O menor e o mais perto do Sol. Um ano dura 88 dias."],
+  venus:["Vênus","O mais quente: 464 °C. Gira ao contrário dos outros."],
+  terra:["Terra","12.756 km de diâmetro. O eixo inclinado cria as estações."],
+  lua:["Lua","Leva 27 dias para dar a volta na Terra e mostra sempre a mesma face."],
+  marte:["Marte","Metade do tamanho da Terra. Tem o maior vulcão do Sistema Solar."],
+  jupiter:["Júpiter","O maior planeta. Um dia lá dura menos de 10 horas."],
+  saturno:["Saturno","Os anéis são de gelo e rocha, e bem finos."],
+  urano:["Urano","Gira deitado, com o eixo quase de lado."],
+  netuno:["Netuno","O mais distante. Tem os ventos mais fortes do Sistema Solar."]
+};
+
+const SCENES = {
+ "spherex":{ nav:"SPHEREx", title:"SPHEREx", lead:"O telescópio da NASA que fotografa o céu inteiro em 102 cores de infravermelho.",
+   quick:[["Lançado","2025"],["Cores","102"],["Céu inteiro","a cada 6 meses"]],
+   tip:"Olhe de cima para dentro dos cones: o brilho no fundo é o telescópio.",
+   cards:{ escudos:["Escudos","Três cones que fazem sombra e deixam o telescópio bem frio."], telescopio:["Telescópio","Separa a luz em 102 faixas de infravermelho."] },
+   curio:"O infravermelho mostra coisas frias e escondidas, como gelo e poeira entre as estrelas.",
+   think:"Por que um telescópio de infravermelho precisa ficar frio?",
+   source:"Modelo simplificado feito pela equipe." },
+ "spitzer":{ nav:"Spitzer", title:"Spitzer em tamanho real", lead:"Modelo oficial da NASA, na escala 1:1. Observou o infravermelho de 2003 a 2020.",
+   quick:[["Altura","4,5 m"],["Espelho","85 cm"],["Missão","2003–2020"]],
+   tip:"Afaste-se três passos antes de posicionar e fique do lado dele para comparar.",
+   cards:{}, curio:"Ele ficava longe da Terra para fugir do calor do nosso planeta.",
+   think:"O que muda entre olhar alguns alvos (Spitzer) e fotografar o céu inteiro (SPHEREx)?", source:"Modelo 3D oficial da NASA." },
+ "ceu":{ nav:"O céu inteiro", title:"O céu inteiro", lead:"Um globo com as estrelas de todo o céu. A faixa clara é a Via Láctea.",
+   quick:[["Diâmetro","80 cm"],["Estrelas","milhões"],["Gira em","60 s"]],
+   tip:"Chegue bem perto: as estrelas brilham mesmo no escuro.",
+   cards:{ polo:["Polo norte celeste","Para onde aponta o eixo da Terra. A estrela Polar fica perto."] },
+   curio:"Em um globo celeste, as estrelas aparecem espelhadas porque olhamos o céu de fora.",
+   think:"Se estamos dentro da Via Láctea, como sabemos que ela é um disco?", source:"Mapa estelar Tycho (NASA)." },
+ "sistema-solar":{ nav:"8 planetas", title:"Os 8 planetas", lead:"Tamanhos em escala entre si. As distâncias foram encurtadas.",
+   quick:[["Maior","Júpiter"],["Menor","Mercúrio"],["Sol nesta escala","2,6 m"]],
+   tip:"Compare a Terra com Júpiter e veja Urano girando deitado.",
+   cards:{ "Mercúrio":F.mercurio,"Vênus":F.venus,"Terra":F.terra,"Marte":F.marte,"Júpiter":F.jupiter,"Saturno":F.saturno,"Urano":F.urano,"Netuno":F.netuno },
+   curio:"Júpiter tem mais massa que todos os outros planetas juntos.",
+   think:"Se a Terra tivesse 2,4 cm, a que distância do Sol ela ficaria? (Uns 280 metros!)", source:NASA+" Mercúrio e Urano: texturas da equipe." },
+ "terra-lua":{ nav:"Terra e Lua", title:"Terra e Lua", lead:"A Lua gira em volta da Terra e sempre mostra o mesmo lado para nós.",
+   quick:[["Volta da Lua","27,3 dias"],["Distância","384 mil km"],["Dia na Terra","24 h"]],
+   tip:"Fique parado e siga a Lua: a face com manchas sempre olha para a Terra.",
+   cards:{ terra:F.terra, lua:F.lua },
+   curio:"A Lua se afasta da Terra cerca de 3,8 cm por ano.",
+   think:"Existe um lado da Lua que nunca recebe luz do Sol?", source:NASA+" Na escala real, a Lua estaria a 7 m." },
+ "marte":{ nav:"Marte", title:"Marte", lead:"O planeta vermelho: a cor vem de poeira com ferro enferrujado.",
+   quick:[["Diâmetro","6.792 km"],["Um dia","24 h 37 min"],["Um ano","687 dias"]],
+   tip:"Procure a mancha branca no topo: é a calota de gelo.",
+   cards:{ calota:["Calota polar","Gelo de água e de gás carbônico que cresce e diminui com as estações."] },
+   curio:"O Monte Olimpo, em Marte, tem cerca de duas vezes e meia a altura do Everest.",
+   think:"Por que Marte é tão frio, mesmo tendo dias parecidos com os nossos?", source:NASA },
+ "jupiter":{ nav:"Júpiter", title:"Júpiter e suas luas", lead:"As quatro luas que Galileu viu em 1610, girando num ritmo combinado.",
+   quick:[["Diâmetro","142.984 km"],["Um dia","9 h 56 min"],["Luas","mais de 90"]],
+   tip:"Conte as voltas: Io, a mais perto, é a mais rápida.",
+   cards:{ faixas:["Faixas de nuvens","Nuvens de amônia puxadas por ventos muito fortes."] },
+   curio:"Ganimedes, lua de Júpiter, é maior que o planeta Mercúrio.",
+   think:"Por que as luas acabam girando em ritmos tão certinhos?", source:NASA+" Luas 3 vezes maiores que na escala." },
+ "saturno":{ nav:"Saturno", title:"Saturno", lead:"Anéis enormes de largura, mas finos como uma folha.",
+   quick:[["Diâmetro","120.536 km"],["Um dia","10 h 33 min"],["Luas","mais de 270"]],
+   tip:"Abaixe-se até a altura dos anéis: eles quase somem.",
+   cards:{ aneis:["Anéis","Bilhões de pedaços de gelo e rocha girando em volta do planeta."], divisao:["Divisão de Cassini","Um vão entre os anéis, aberto pela gravidade da lua Mimas."] },
+   curio:"Saturno é tão pouco denso que boiaria numa banheira gigante.",
+   think:"Se os anéis são tão finos, como conseguimos vê-los daqui?", source:NASA+" Anéis desenhados pela equipe." },
+ "planeta-x":{ nav:"Órbitas do Planeta X", title:"A pista do Planeta X", lead:"Órbitas distantes que apontam para lados parecidos. Um planeta escondido explicaria isso.",
+   quick:[["Proposto em","2016"],["Massa estimada","algumas Terras"],["Já visto?","ainda não"]],
+   tip:"Siga Sedna: perto do Sol ela corre, longe ela fica lenta.",
+   cards:{ sedna:["Sedna","Leva mais de 11 mil anos para dar uma volta no Sol."], "2012-vp113":["2012 VP113","Outro objeto distante com órbita bem comprida."],
+           "planeta-x":["Planeta X","A órbita tracejada é uma hipótese. Ninguém o viu ainda."], sol:["Sol","No centro também estão Netuno e Plutão."] },
+   curio:"Netuno também foi previsto antes de ser visto, em 1846, por causa da gravidade.",
+   think:"Como dá para desconfiar de um planeta sem nunca tê-lo visto?", source:"Órbitas aproximadas, com base no JPL Small-Body Database." },
+ "tamanho":{ nav:"Tamanho do Planeta X", title:"Do tamanho de quê?", lead:"O Planeta X seria maior que a Terra e menor que Netuno.",
+   quick:[["Terra","1 x"],["Planeta X","~2 x"],["Netuno","3,9 x"]],
+   tip:"Ande em volta: o Planeta X brilha em roxo porque é uma hipótese.",
+   cards:{ terra:F.terra, px:["Planeta X","Tamanho e cor ilustrativos: ninguém o viu ainda."], netuno:F.netuno },
+   curio:"Telescópios infravermelhos ajudam a procurar planetas frios, que brilham pouco.",
+   think:"Por que é tão difícil achar um planeta assim, tão longe do Sol?", source:NASA+" Planeta X: textura da equipe." }
+};
+
+const mv=document.getElementById("mv"), $=id=>document.getElementById(id);
+let current=ORDEM[0];
+const esc=t=>{const d=document.createElement("div"); d.textContent=t; return d.innerHTML;};
+
+$("scenes").innerHTML=ORDEM.map(id=>`<button type="button" data-id="${id}" aria-current="false">${SCENES[id].nav}</button>`).join("");
+
+function flash(el, ms){ el.dataset.open=""; clearTimeout(el._t); el._t=setTimeout(()=>delete el.dataset.open, ms); }
+
+function setHotspots(id){
+  mv.querySelectorAll(".hotspot").forEach(h=>h.remove());
+  (HOTSPOTS[id]||[]).forEach((h,k)=>{
+    const b=document.createElement("button");
+    b.type="button"; b.className="hotspot"; b.slot=`hotspot-${k}`;
+    b.dataset.position=h.pos; b.dataset.visibilityAttribute="visible";
+    b.setAttribute("aria-label",`Sobre ${h.label}`);
+    b.innerHTML=`<span class="dot" aria-hidden="true">+</span>`+(ONLY_DOT.includes(id)?"":`<span class="txt">${esc(h.label)}</span>`);
+    b.addEventListener("click",()=>openCard(h.id));
+    mv.appendChild(b);
+  });
+}
+
+function openCard(key){
+  const c=SCENES[current].cards[key]; if(!c) return;
+  $("arInfo").innerHTML=`<strong>${esc(c[0])}</strong>: ${esc(c[1])}`; flash($("arInfo"),7000);
+  $("moreBox").open=true;
+  const el=$("fact-"+key);
+  if(el){ el.scrollIntoView({block:"nearest"}); el.classList.add("flash"); setTimeout(()=>el.classList.remove("flash"),1500); }
+}
+
+function show(id){
+  current=ORDEM.includes(id)?id:ORDEM[0];
+  const s=SCENES[current];
+  mv.src=MODELS[current]; mv.iosSrc=IOS[current]||""; mv.alt=s.title;
+  if(IOS[current]) mv.setAttribute("ios-src",IOS[current]); else mv.removeAttribute("ios-src");
+  mv.setAttribute("camera-orbit","auto auto auto"); mv.cameraOrbit="auto auto auto";
+  setHotspots(current);
+  $("title").textContent=s.title; $("lead").textContent=s.lead; $("tip").textContent=s.tip;
+  $("quick").innerHTML=s.quick.map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("");
+  $("facts").innerHTML=Object.entries(s.cards).map(([k,c])=>`<p class="fact" id="fact-${k}"><b>${esc(c[0])}</b>: ${esc(c[1])}</p>`).join("");
+  $("curio").textContent=s.curio; $("think").textContent=s.think; $("source").textContent=s.source;
+  $("arTip").textContent=s.tip; delete $("arInfo").dataset.open;
+  document.title=`${s.nav} | AstroByte AR`;
+  document.querySelectorAll("#scenes button").forEach(b=>{
+    const on=b.dataset.id===current; b.setAttribute("aria-current",on);
+    if(on && b.scrollIntoView) b.scrollIntoView({block:"nearest",inline:"nearest"});
+  });
+}
+
+const idFromHash=()=>{const h=location.hash.slice(1); return ORDEM.includes(h)?h:ORDEM[0];};
+const go=id=>{ if(location.hash==="#"+id) show(id); else location.hash=id; };
+$("scenes").addEventListener("click",e=>{const b=e.target.closest("button[data-id]"); if(b) go(b.dataset.id);});
+$("prev").addEventListener("click",()=>go(ORDEM[(ORDEM.indexOf(current)+ORDEM.length-1)%ORDEM.length]));
+$("next").addEventListener("click",()=>go(ORDEM[(ORDEM.indexOf(current)+1)%ORDEM.length]));
+window.addEventListener("hashchange",()=>show(idFromHash()));
+
+mv.addEventListener("ar-status",e=>{ if(e.detail.status==="session-started") flash($("arTip"),6000); });
+mv.addEventListener("progress",e=>{ $("bar").style.width=(e.detail.totalProgress*100)+"%";
+  if(e.detail.totalProgress>=1) setTimeout(()=>{$("bar").style.width="0"},400); });
+mv.addEventListener("load",()=>{ $("noAr").hidden=!!mv.canActivateAR; if(mv.play) mv.play(); });
+mv.addEventListener("error",()=>{ $("noAr").hidden=false; $("noAr").textContent="O modelo não carregou. Recarregue a página."; });
+
+show(idFromHash());
+
+/* ---------- menu (celular) ---------- */
+const menuBtn=$("menuBtn"), menu=$("menu");
+menuBtn.addEventListener("click",()=>{
+  const open=menuBtn.getAttribute("aria-expanded")!=="true";
+  menuBtn.setAttribute("aria-expanded",open);
+  if(open) menu.dataset.open=""; else delete menu.dataset.open;
+});
+document.addEventListener("click",e=>{ if(!menu.contains(e.target)&&!menuBtn.contains(e.target)){ delete menu.dataset.open; menuBtn.setAttribute("aria-expanded","false"); } });
+// enquanto o site parceiro não tiver endereço, o link não faz nada
+$("partnerLink").addEventListener("click",e=>{ if(e.currentTarget.hasAttribute("data-pending")) e.preventDefault(); });
+
+/* ---------- céu estrelado animado ---------- */
+(function ceu(){
+  const cv=$("ceu"), ctx=cv.getContext && cv.getContext("2d");
+  if(!ctx) return;
+  const calmo=!!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+  let W=0,H=0,dpr=1,estrelas=[],cadente=null,proxCadente=performance.now()+5000;
+  const cores=["255,244,220","255,214,150","200,215,255","255,255,255"];
+  function criar(){
+    dpr=Math.min(window.devicePixelRatio||1,2);
+    W=innerWidth; H=innerHeight; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+    const n=Math.round(W*H/2600);
+    estrelas=Array.from({length:n},()=>{
+      const camada=Math.random();
+      return {x:Math.random()*W, y:Math.random()*H, r:camada<.85?Math.random()*.9+.3:Math.random()*1.4+1,
+        v:(camada<.6?.004:camada<.9?.01:.02), fase:Math.random()*6.28, ritmo:.6+Math.random()*1.8,
+        cor:cores[(Math.random()*cores.length)|0], brilho:camada>.97};
+    });
+  }
+  function desenhar(t){
+    ctx.clearRect(0,0,W,H);
+    for(const s of estrelas){
+      if(!calmo){ s.x+=s.v; s.y+=s.v*.35; if(s.x>W+2) s.x=-2; if(s.y>H+2) s.y=-2; }
+      const a=calmo?.8:.45+.55*Math.abs(Math.sin(s.fase+t/1000*s.ritmo*.6));
+      ctx.fillStyle=`rgba(${s.cor},${a})`;
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,6.283); ctx.fill();
+      if(s.brilho){ // estrelas maiores ganham uma cruz de brilho, como na logo
+        ctx.strokeStyle=`rgba(255,214,150,${a*.5})`; ctx.lineWidth=.7;
+        ctx.beginPath(); ctx.moveTo(s.x-s.r*4,s.y); ctx.lineTo(s.x+s.r*4,s.y); ctx.moveTo(s.x,s.y-s.r*4); ctx.lineTo(s.x,s.y+s.r*4); ctx.stroke();
+      }
+    }
+    if(!calmo){
+      if(!cadente && t>proxCadente){ cadente={x:Math.random()*W*.7, y:Math.random()*H*.3, vida:0}; }
+      if(cadente){
+        cadente.vida+=1; const p=cadente.vida/60, x=cadente.x+p*260, y=cadente.y+p*110;
+        const g=ctx.createLinearGradient(x-90,y-38,x,y);
+        g.addColorStop(0,"rgba(255,194,74,0)"); g.addColorStop(1,`rgba(255,236,190,${1-p})`);
+        ctx.strokeStyle=g; ctx.lineWidth=1.6; ctx.beginPath(); ctx.moveTo(x-90,y-38); ctx.lineTo(x,y); ctx.stroke();
+        if(p>=1){ cadente=null; proxCadente=t+9000+Math.random()*9000; }
+      }
+      requestAnimationFrame(desenhar);
+    }
+  }
+  criar(); addEventListener("resize",()=>{ criar(); if(calmo) desenhar(0); });
+  requestAnimationFrame(desenhar);
+})();
+</script>
+</body>
+</html>
