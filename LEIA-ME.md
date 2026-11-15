@@ -3,7 +3,6 @@
 ```
 index.html        abre direto a realidade aumentada
 ar/               10 experiências de realidade aumentada
-cartas/           página de venda do card game
 jogo/             jogo de navegador "Corrida Estelar"
   fotos/          fotos opcionais das cartas do jogo (veja abaixo)
 comum/            logo, estilo e céu estrelado usados pelas páginas
@@ -17,11 +16,6 @@ Para publicar, envie a pasta inteira (com essa estrutura) para o GitHub Pages ou
 - As estrelas douradas abrem cartas com objetos reais. Os textos ficam na lista `CARTAS`, no começo do script do `jogo/index.html`.
 - **Fotos:** para mostrar uma foto em vez da ilustração em pixel art, coloque a imagem em `jogo/fotos/` com o nome indicado em cada carta (por exemplo `barnard.jpg`). Usem imagens com licença livre, como as da NASA, e citem a fonte no campo `fonte`.
 - Nada é salvo: ao recarregar a página, recorde e cartas recomeçam.
-
-## Card game
-
-- O preço fica no bloco "Pré-venda" do `cartas/index.html` (procure o comentário "Troque o texto abaixo pelo preço").
-- Os botões de reserva abrem um e-mail para astrobyte.nasa@gmail.com.
 
 # Realidade aumentada: o universo na sua câmera
 
@@ -54,7 +48,6 @@ Tudo é animado: os planetas giram, as luas orbitam, Sedna percorre a órbita de
 
 O menu tem quatro links e aparece igual nas três páginas (em cada `index.html`):
 
-- **Realidade aumentada** (`ar/`), **Card game** (`cartas/`) e **Jogo** (`jogo/`).
 
 - **Site parceiro:** fica separado por um traço, com a etiqueta "Parceiro". Para ativar, em cada uma das três páginas, troquem `href="#"` pelo endereço, o texto "Site parceiro" pelo nome do site e apaguem `data-pending` da mesma linha.
 
