@@ -70,3 +70,5 @@ button{font:inherit}
 button:focus-visible, a:focus-visible, summary:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
 button:focus-visible, a:focus-visible, summary:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
 @media (prefers-reduced-motion: reduce){ .nebula{animation:none} }
+.menu a#partnerLink{background:var(--orange); color:#1a1004}
+.menu a#partnerLink:hover, .menu a#partnerLink:focus-visible{background:var(--gold)}
