@@ -3,18 +3,18 @@
 ```
 index.html        abre direto a realidade aumentada
 ar/               10 experiências de realidade aumentada
-game/             game de navegador "Corrida Estelar"
-  fotos/          fotos opcionais das cartas do game (veja abaixo)
+Game/             Game de navegador "Corrida Estelar"
+  fotos/          fotos opcionais das cartas do Game (veja abaixo)
 comum/            logo, estilo e céu estrelado usados pelas páginas
 ```
 
 Para publicar, envie a pasta inteira (com essa estrutura) para o GitHub Pages ou para a hospedagem de vocês. Os links do menu já apontam uns para os outros.
 
-## game: Corrida Estelar
+## Game: Corrida Estelar
 
 - Toque ou espaço: impulso do jato. Toque rápido = pulo baixo; segurar = pulo alto. Seta para baixo ou deslizar: descer rápido. P: pausar.
-- As estrelas douradas abrem cartas com objetos reais. Os textos ficam na lista `CARTAS`, no começo do script do `game/index.html`.
-- **Fotos:** para mostrar uma foto em vez da ilustração em pixel art, coloque a imagem em `game/fotos/` com o nome indicado em cada carta (por exemplo `barnard.jpg`). Usem imagens com licença livre, como as da NASA, e citem a fonte no campo `fonte`.
+- As estrelas douradas abrem cartas com objetos reais. Os textos ficam na lista `CARTAS`, no começo do script do `Game/index.html`.
+- **Fotos:** para mostrar uma foto em vez da ilustração em pixel art, coloque a imagem em `Game/fotos/` com o nome indicado em cada carta (por exemplo `barnard.jpg`). Usem imagens com licença livre, como as da NASA, e citem a fonte no campo `fonte`.
 - Nada é salvo: ao recarregar a página, recorde e cartas recomeçam.
 
 # Realidade aumentada: o universo na sua câmera
@@ -44,7 +44,7 @@ Tudo é animado: os planetas giram, as luas orbitam, Sedna percorre a órbita de
 - **iPhone/iPad (Safari):** abre o AR Quick Look da Apple com os arquivos `.usdz`, que já trazem a animação e os textinhos. Os pontos amarelos clicáveis não aparecem no iPhone.
 - A realidade aumentada só funciona em endereço **https**.
 
-## Menu, game e site parceiro
+## Menu, Game e site parceiro
 
 O menu tem quatro links e aparece igual nas três páginas (em cada `index.html`):
 
@@ -93,10 +93,10 @@ O primeiro script lê as imagens da pasta `texturas` e grava os `.glb` em `model
 
 ## Idioma (PT/EN)
 
-Todas as páginas têm os botões **PT | EN** no topo (no game, na barra de cima). A escolha fica salva no navegador, e também dá para abrir direto em inglês com `?lang=en` no fim do link (por exemplo `ar/?lang=en#marte`).
+Todas as páginas têm os botões **PT | EN** no topo (no Game, na barra de cima). A escolha fica salva no navegador, e também dá para abrir direto em inglês com `?lang=en` no fim do link (por exemplo `ar/?lang=en#marte`).
 
 - Os textos fixos usam `data-i18n="chave"`. As traduções ficam no próprio `index.html` de cada página, em `AB.registrar({pt:{...}, en:{...}})`.
-- Na realidade aumentada, as 10 experiências em inglês estão em `SCENES_EN`. No game, as cartas estão em `CARTAS_EN`.
+- Na realidade aumentada, as 10 experiências em inglês estão em `SCENES_EN`. No Game, as cartas estão em `CARTAS_EN`.
 - Os textinhos gravados **dentro** dos modelos 3D continuam em português.
 
 ## Acessibilidade

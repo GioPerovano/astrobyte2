@@ -28,8 +28,8 @@
 
   const COMUM = {
     pt: {
-      "menu.btn": "Menu", "menu.aria": "Menu principal", "menu.ra": "Realidade aumentada", "menu.game": "game",
-      "menu.cartas": "Card game", "menu.parceiro": "Parceiro", "menu.spherex": "SPHEREx · Planeta X",
+      "menu.btn": "Menu", "menu.aria": "Menu principal", "menu.ra": "Realidade aumentada", "menu.Game": "Game",
+      "menu.cartas": "Card Game", "menu.parceiro": "Parceiro", "menu.spherex": "SPHEREx · Planeta X",
       "logo.aria": "AstroByte, início",
       "rodape.redes": "Redes sociais do AstroByte", "rodape.fale": "Fale com a gente:",
       "rodape.credito": "Página criada pela equipe AstroByte para o NASA Space Apps Challenge 2026. Imagens e dados científicos: NASA.",
@@ -40,8 +40,8 @@
       "ab.restaurar": "Restaurar padrão", "ab.fechar": "Fechar", "ab.semvoz": "Seu navegador não tem leitura em voz alta."
     },
     en: {
-      "menu.btn": "Menu", "menu.aria": "Main menu", "menu.ra": "Augmented reality", "menu.game": "Game",
-      "menu.cartas": "Card game", "menu.parceiro": "Partner", "menu.spherex": "SPHEREx · Planet X",
+      "menu.btn": "Menu", "menu.aria": "Main menu", "menu.ra": "Augmented reality", "menu.Game": "Game",
+      "menu.cartas": "Card Game", "menu.parceiro": "Partner", "menu.spherex": "SPHEREx · Planet X",
       "logo.aria": "AstroByte, home",
       "rodape.redes": "AstroByte social media", "rodape.fale": "Contact us:",
       "rodape.credito": "Page created by the AstroByte team for the NASA Space Apps Challenge 2026. Images and scientific data: NASA.",
