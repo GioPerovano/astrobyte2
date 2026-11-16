@@ -328,6 +328,7 @@ if(window.ResizeObserver) new ResizeObserver(redimensionar).observe(cv);
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(redimensionar);
 
 function reiniciar(){
+  A.frame=0;
   E.t=0; E.vel=105; E.dist=0; E.obst=[]; E.itens=[]; E.part=[]; E.tremor=0; E.inv=0; E.prox=60; E.proxEstrela=rnd(9,13);
   A.y=CHAO-A.h; A.vy=0; A.noChao=true; A.segurando=false; A.mergulho=false;
   atualizaHud();
@@ -588,7 +589,7 @@ function desenhar(){
   // astronauta
   if(E.modo!=="caindo" && E.modo!=="fim" || E.modo==="inicio"){
     if(!(E.inv>0 && Math.floor(E.t*12)%2)){
-      const spr=A.noChao?ASTRO[Math.floor(A.frame)%2]:ASTRO_CAI;
+      const spr=A.noChao?ASTRO[((Math.floor(A.frame)%2)+2)%2]:ASTRO_CAI;
       ctx.drawImage(spr, A.x|0, A.y|0);
       if(!A.noChao && A.segurando){ ctx.fillStyle=Math.random()<.5?PAL.laranja:PAL.ouro; ctx.fillRect((A.x+1)|0,(A.y+11)|0,1,2+rint(0,2)); }
     }
@@ -599,11 +600,13 @@ function desenhar(){
 /* ---------- laço principal ---------- */
 let ultimo=performance.now();
 function loop(agora){
-  let dt=Math.min(0.05,(agora-ultimo)/1000); ultimo=agora;
-  if(E.modo==="jogando") passo(dt);
-  else if(E.modo==="caindo"){ E.part.forEach(p=>{ p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=40*dt; p.v-=dt; }); E.part=E.part.filter(p=>p.v>0); if(E.tremor>0) E.tremor-=dt; }
-  else if(E.modo==="inicio" && !calmo){ E.fundoX+=20*dt; E.t+=dt; A.frame+=dt*4; }
-  desenhar();
+  try{
+    let dt=Math.max(0, Math.min(0.05,(agora-ultimo)/1000)); ultimo=agora;
+    if(E.modo==="jogando") passo(dt);
+    else if(E.modo==="caindo"){ E.part.forEach(p=>{ p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=40*dt; p.v-=dt; }); E.part=E.part.filter(p=>p.v>0); if(E.tremor>0) E.tremor-=dt; }
+    else if(E.modo==="inicio" && !calmo){ E.fundoX+=20*dt; E.t+=dt; A.frame+=dt*4; }
+    desenhar();
+  }catch(err){ console.error(err); }
   requestAnimationFrame(loop);
 }
 redimensionar(); reiniciar(); E.modo="inicio";
