@@ -3,8 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<title data-i18n="j.titulo">AstroByte: Corrida Estelar</title>
-<script src="../comum/ferramentas.js"></script>
+<title>AstroByte: Corrida Estelar</title>
 <meta name="description" content="Jogo de navegador: guie o astronauta entre asteroides e colete cartas com informações de estrelas reais.">
 <meta name="theme-color" content="#000000">
 <link rel="icon" href="../comum/logo-topo.png">
@@ -87,65 +86,63 @@ canvas#jogo{position:fixed; inset:0; width:100vw; height:100vh; height:100dvh; d
 .star-card li{margin:.25rem 0}
 .star-card .src{margin:0 0 12px; font:400 12px/1.4 var(--body); color:var(--muted)}
 .star-card .go{display:block; width:100%}
-.hud .ab-ferramentas{pointer-events:auto}
-.box, .star-card, .menu{zoom:var(--ab-escala,1)}
 button:focus-visible, a:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
 @media (prefers-reduced-motion: reduce){ .blink, .star-card{animation:none} }
 </style>
 </head>
 <body>
-<canvas id="jogo" aria-label="Jogo AstroByte: Corrida Estelar" data-i18n-attr="aria-label:j.canvas"></canvas>
+<canvas id="jogo" aria-label="Jogo AstroByte: Corrida Estelar"></canvas>
 
 <div class="hud">
-  <button type="button" id="menuBtn" aria-expanded="false" aria-controls="menu" data-i18n="menu.btn">MENU</button>
-  <button type="button" id="pauseBtn" aria-label="Pausar" data-i18n-attr="aria-label:j.pausar"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="3" y="2" width="4" height="12"/><rect x="9" y="2" width="4" height="12"/></svg></button>
-  <button type="button" id="somBtn" aria-label="Desligar som" data-i18n-attr="aria-label:j.somOff" aria-pressed="true"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M2 6h3l4-3v10L5 10H2z"/><path id="ondas" d="M11 5c1 1 1 5 0 6M12.5 3.5c2 2 2 7 0 9" stroke="currentColor" fill="none" stroke-width="1.5"/></svg></button>
-  <div id="abFerramentas"></div>
+  <button type="button" id="menuBtn" aria-expanded="false" aria-controls="menu">MENU</button>
+  <button type="button" id="pauseBtn" aria-label="Pausar"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="3" y="2" width="4" height="12"/><rect x="9" y="2" width="4" height="12"/></svg></button>
+  <button type="button" id="somBtn" aria-label="Desligar som" aria-pressed="true"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M2 6h3l4-3v10L5 10H2z"/><path id="ondas" d="M11 5c1 1 1 5 0 6M12.5 3.5c2 2 2 7 0 9" stroke="currentColor" fill="none" stroke-width="1.5"/></svg></button>
   <span class="grow"></span>
   <div class="score" aria-live="off">
-    <span><span data-i18n="j.cartas">CARTAS</span> <b id="hCartas">0/8</b></span>
-    <span><span data-i18n="j.rec">REC</span> <b id="hRec">00000</b></span>
+    <span>CARTAS <b id="hCartas">0/8</b></span>
+    <span>REC <b id="hRec">00000</b></span>
     <span><b id="hDist">00000</b></span>
   </div>
 </div>
 
-<nav class="menu" id="menu" aria-label="Menu principal" data-i18n-attr="aria-label:menu.aria">
-  <a href="../ar/" data-i18n="menu.ra">Realidade aumentada</a>
-  <a href="./" aria-current="page" data-i18n="menu.jogo">Jogo</a>
+<nav class="menu" id="menu" aria-label="Menu principal">
+  <a href="../ar/">Realidade aumentada</a>
+  <a href="./" aria-current="page">Jogo</a>
   <hr>
-  <small data-i18n="menu.parceiro">PARCEIRO</small>
-  <a href="../spherex/" id="partnerLink" data-i18n="menu.spherex">SPHEREx · Planeta X</a>
+  <small>PARCEIRO</small>
+  <!-- Troque "#" pelo endereço do site parceiro e apague data-pending. -->
+  <a href="#" id="partnerLink" data-pending>Site parceiro</a>
 </nav>
 
 <div class="screen" id="inicio" data-open>
   <div class="box">
     <img class="logo" src="../comum/logo.png" alt="AstroByte">
-    <h1 data-i18n="j.h1">CORRIDA ESTELAR</h1>
-    <p data-i18n="j.intro">Desvie dos asteroides e pegue as estrelas douradas. Cada estrela abre uma carta com um objeto real do espaço.</p>
+    <h1>CORRIDA ESTELAR</h1>
+    <p>Desvie dos asteroides e pegue as estrelas douradas. Cada estrela abre uma carta com um objeto real do espaço.</p>
     <div class="keys">
-      <kbd data-i18n="j.toque">TOQUE</kbd><span data-i18n-html="j.k1">ou <b>espaço</b>: impulso do jato. Toque rápido = pulo baixo; segure = pulo alto</span>
-      <kbd>↓</kbd><span data-i18n="j.k2">ou deslize para baixo: descer rápido</span>
-      <kbd>P</kbd><span data-i18n="j.k3">pausar</span>
+      <kbd>TOQUE</kbd><span>ou <b>espaço</b>: impulso do jato. Toque rápido = pulo baixo; segure = pulo alto</span>
+      <kbd>↓</kbd><span>ou deslize para baixo: descer rápido</span>
+      <kbd>P</kbd><span>pausar</span>
     </div>
-    <button class="go blink" type="button" id="startBtn" data-i18n="j.comecar">COMEÇAR</button>
-    <p class="tiny" id="dicaGire" hidden data-i18n="j.gire">Dica: deite o celular para enxergar os asteroides mais cedo.</p>
-    <p class="tiny" data-i18n="j.salvo">Nada fica salvo: ao recarregar a página, tudo recomeça.</p>
+    <button class="go blink" type="button" id="startBtn">COMEÇAR</button>
+    <p class="tiny" id="dicaGire" hidden>Dica: deite o celular para enxergar os asteroides mais cedo.</p>
+    <p class="tiny">Nada fica salvo: ao recarregar a página, tudo recomeça.</p>
   </div>
 </div>
 
 <div class="screen" id="fim">
   <div class="box">
-    <h2 data-i18n="j.fim">FIM DA MISSÃO</h2>
+    <h2>FIM DA MISSÃO</h2>
     <p id="fimTexto"></p>
     <div class="album" id="album"></div>
-    <button class="go" type="button" id="againBtn" data-i18n="j.denovo">JOGAR DE NOVO</button>
+    <button class="go" type="button" id="againBtn">JOGAR DE NOVO</button>
   </div>
 </div>
 
 <div class="screen" id="pausa">
   <div class="box">
-    <h2 data-i18n="j.pausa">PAUSA</h2>
-    <button class="go" type="button" id="resumeBtn" data-i18n="j.continuar">CONTINUAR</button>
+    <h2>PAUSA</h2>
+    <button class="go" type="button" id="resumeBtn">CONTINUAR</button>
   </div>
 </div>
 
@@ -157,7 +154,7 @@ button:focus-visible, a:focus-visible{outline:3px solid var(--gold); outline-off
     <dl class="meta" id="cMeta"></dl>
     <ul id="cFatos"></ul>
     <p class="src" id="cFonte"></p>
-    <button class="go" type="button" id="contBtn" data-i18n="j.continuar">CONTINUAR</button>
+    <button class="go" type="button" id="contBtn">CONTINUAR</button>
   </article>
 </div>
 
@@ -206,52 +203,12 @@ const CARTAS = [
     fonte:"Hipótese científica em estudo" }
 ];
 
-/* ---------- textos em inglês (mesmos ids das cartas) ---------- */
-const CARTAS_EN = {
-  spherex:{ nome:"SPHEREx", meta:[["Type","NASA space telescope"],["Where","Orbiting Earth"],["Launch","March 2025"]],
-    fatos:["Photographs the whole sky in 102 infrared colors.","Makes a complete map of the sky every six months."], fonte:"NASA/JPL-Caltech" },
-  barnard:{ nome:"Barnard's Star", meta:[["Type","Red dwarf"],["Distance","about 6 light-years"],["Constellation","Ophiuchus"]],
-    fatos:["It is the star that moves fastest across our sky.","It is the closest single star to the Sun, and small planets orbit it."], fonte:"NASA" },
-  wise0855:{ nome:"WISE 0855", meta:[["Type","Brown dwarf"],["Distance","about 7.4 light-years"],["Discovered","2014, with the WISE telescope"]],
-    fatos:["It is the coldest brown dwarf we know, close to the temperature at which water freezes.","Brown dwarfs are too big to be planets and too small to shine like stars."], fonte:"NASA / WISE" },
-  epsilon:{ nome:"Epsilon Indi B", meta:[["Type","Pair of brown dwarfs"],["Distance","about 12 light-years"],["Constellation","Indus"]],
-    fatos:["Two brown dwarfs orbiting each other.","The system also has a star and a cold giant planet, photographed by the James Webb telescope."], fonte:"NASA / Webb" },
-  rdra:{ nome:"R Draconis", meta:[["Type","Variable red giant"],["Constellation","Draco"]],
-    fatos:["It pulses: it gets brighter and dimmer in cycles of a few months.","Red giants are old, swollen stars. The Sun will become one in billions of years."], fonte:"Variable star catalogs" },
-  rwaur:{ nome:"RW Aurigae", meta:[["Type","Young star (double)"],["Constellation","Auriga"]],
-    fatos:["A newborn star, still surrounded by gas and dust.","Every now and then its light drops a lot, when dust clouds pass in front of it."], fonte:"NASA / Chandra" },
-  sedna:{ nome:"Sedna", meta:[["Type","Distant Solar System object"],["Discovered","2003"],["One orbit","more than 11,000 years"]],
-    fatos:["One of the most distant bodies we know in the Solar System.","Its long orbit is one of the clues behind the Planet X hypothesis."], fonte:"NASA" },
-  planetax:{ nome:"Planet X", meta:[["Type","Hypothetical planet"],["Estimated mass","a few times Earth's"],["Proposed in","2016"]],
-    fatos:["Nobody has seen this planet yet. It would explain strange orbits of distant objects.","Infrared telescopes help in the search, because even cold worlds give off a little heat."], fonte:"Scientific hypothesis under study" }
-};
-const cartaTxt = c => (AB.lang === "en" && CARTAS_EN[c.id]) ? Object.assign({}, c, CARTAS_EN[c.id]) : c;
-AB.registrar({
- pt:{ "j.titulo":"AstroByte: Corrida Estelar","j.canvas":"Jogo AstroByte: Corrida Estelar","j.pausar":"Pausar","j.somOff":"Desligar som","j.somOn":"Ligar som",
-   "j.cartas":"CARTAS","j.rec":"REC","j.h1":"CORRIDA ESTELAR",
-   "j.intro":"Desvie dos asteroides e pegue as estrelas douradas. Cada estrela abre uma carta com um objeto real do espaço.",
-   "j.toque":"TOQUE","j.k1":"ou <b>espaço</b>: impulso do jato. Toque rápido = pulo baixo; segure = pulo alto",
-   "j.k2":"ou deslize para baixo: descer rápido","j.k3":"pausar","j.comecar":"COMEÇAR",
-   "j.gire":"Dica: deite o celular para enxergar os asteroides mais cedo.","j.salvo":"Nada fica salvo: ao recarregar a página, tudo recomeça.",
-   "j.fim":"FIM DA MISSÃO","j.denovo":"JOGAR DE NOVO","j.pausa":"PAUSA","j.continuar":"CONTINUAR","j.nova":"NOVA CARTA!",
-   "j.repetida":"CARTA REPETIDA, MAS VALE RELER!","j.fonte":"Fonte: ","j.foto":"Foto: ",
-   "j.fimTxt":"Você percorreu {d} mil km e encontrou {c} de {t} cartas." },
- en:{ "j.titulo":"AstroByte: Star Run","j.canvas":"AstroByte game: Star Run","j.pausar":"Pause","j.somOff":"Turn sound off","j.somOn":"Turn sound on",
-   "j.cartas":"CARDS","j.rec":"BEST","j.h1":"STAR RUN",
-   "j.intro":"Dodge the asteroids and grab the golden stars. Each star opens a card about a real object in space.",
-   "j.toque":"TAP","j.k1":"or <b>space</b>: jetpack boost. Quick tap = low jump; hold = high jump",
-   "j.k2":"or swipe down: drop fast","j.k3":"pause","j.comecar":"START",
-   "j.gire":"Tip: turn your phone sideways to see the asteroids sooner.","j.salvo":"Nothing is saved: reloading the page starts everything over.",
-   "j.fim":"MISSION OVER","j.denovo":"PLAY AGAIN","j.pausa":"PAUSED","j.continuar":"CONTINUE","j.nova":"NEW CARD!",
-   "j.repetida":"REPEATED CARD, BUT WORTH A REREAD!","j.fonte":"Source: ","j.foto":"Photo: ",
-   "j.fimTxt":"You traveled {d} thousand km and found {c} of {t} cards." }
-});
-
 /* ---------- utilidades ---------- */
 const $ = id => document.getElementById(id);
 const cv = $("jogo"), ctx = cv.getContext("2d");
-const calmo = () => window.AB ? AB.movimentoReduzido() : !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+const calmo = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
 let W=320, H=180, ESC=3, CHAO=156, FV=1;
+let ultW=0, ultH=0;   // último tamanho medido do canvas
 const rnd=(a,b)=>a+Math.random()*(b-a), rint=(a,b)=>Math.floor(rnd(a,b+1));
 const PAL={preto:"#000",tinta:"#FFF4DC",ouro:"#FFC24A",laranja:"#F7931E",violeta:"#8B7CFF",azul:"#3B6FE0",cinza:"#6E6A80",cinzaE:"#3A3748",cinzaC:"#A9A3B8",vermelho:"#FF5A3C"};
 
@@ -340,8 +297,15 @@ const TERRA=sprite(26,26,g=>{
 const E={ modo:"inicio", t:0, vel:0, dist:0, rec:0, coletadas:new Set(), proxCarta:0, obst:[], itens:[], part:[], tremor:0, inv:0, fundoX:0, prox:0, proxEstrela:0 };
 const A={ x:34, y:0, vy:0, w:12, h:15, noChao:true, segurando:false, tSegura:0, mergulho:false, frame:0 };
 
+/* Mede o tamanho REAL do canvas (o que o CSS está mostrando agora), e não
+   innerWidth/innerHeight, que no celular podem mudar depois da primeira carga
+   (barra do navegador, navegador embutido, fontes). Só recria o cenário se o
+   tamanho mudou de verdade. */
 function redimensionar(){
-  const vw=innerWidth, vh=innerHeight;
+  const r=cv.getBoundingClientRect();
+  const vw=Math.round(r.width)||innerWidth, vh=Math.round(r.height)||innerHeight;
+  if(vw===ultW && vh===ultH) return;
+  ultW=vw; ultH=vh;
   const retrato = vw<vh;
   ESC=Math.max(2, Math.round(Math.min(vh/200, vw/240)));
   if(retrato) ESC=Math.max(2, Math.floor(vw/125));
@@ -356,6 +320,12 @@ function redimensionar(){
   if(E.modo!=="jogando") desenhar();
 }
 addEventListener("resize", redimensionar);
+addEventListener("orientationchange", ()=>setTimeout(redimensionar,200));
+addEventListener("load", redimensionar);
+addEventListener("pageshow", redimensionar);
+if(window.visualViewport) visualViewport.addEventListener("resize", redimensionar);
+if(window.ResizeObserver) new ResizeObserver(redimensionar).observe(cv);
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(redimensionar);
 
 function reiniciar(){
   E.t=0; E.vel=105; E.dist=0; E.obst=[]; E.itens=[]; E.part=[]; E.tremor=0; E.inv=0; E.prox=60; E.proxEstrela=rnd(9,13);
@@ -401,7 +371,12 @@ cv.addEventListener("pointermove",e=>{ if(toqueY!==null && e.clientY-toqueY>40){
 addEventListener("pointerup",()=>{ toqueY=null; soltar(); });
 addEventListener("pointercancel",()=>{ toqueY=null; soltar(); });
 
-function comecar(){ fecharTelas(); reiniciar(); E.modo="jogando"; ultimo=performance.now(); }
+function comecar(){
+  fecharTelas();
+  redimensionar();   // garante o tamanho real da tela no momento em que o jogo começa
+  reiniciar();
+  E.modo="jogando"; ultimo=performance.now();
+}
 function fecharTelas(){ ["inicio","fim","pausa"].forEach(id=>delete $(id).dataset.open); }
 function alternarPausa(){
   if(E.modo==="jogando"){ E.modo="pausa"; $("pausa").dataset.open=""; $("resumeBtn").focus(); }
@@ -412,11 +387,11 @@ $("againBtn").addEventListener("click",comecar);
 $("resumeBtn").addEventListener("click",alternarPausa);
 $("pauseBtn").addEventListener("click",alternarPausa);
 $("somBtn").addEventListener("click",()=>{ somLigado=!somLigado; $("somBtn").setAttribute("aria-pressed",somLigado);
-  $("somBtn").setAttribute("aria-label",somLigado?AB.t("j.somOff"):AB.t("j.somOn")); $("ondas").style.display=somLigado?"":"none"; });
-AB.aoMudarIdioma(()=>$("somBtn").setAttribute("aria-label",somLigado?AB.t("j.somOff"):AB.t("j.somOn")));
+  $("somBtn").setAttribute("aria-label",somLigado?"Desligar som":"Ligar som"); $("ondas").style.display=somLigado?"":"none"; });
 $("menuBtn").addEventListener("click",()=>{ const m=$("menu"), abre=!m.hasAttribute("data-open");
   if(abre){ m.dataset.open=""; if(E.modo==="jogando") alternarPausa(); } else delete m.dataset.open;
   $("menuBtn").setAttribute("aria-expanded",abre); });
+$("partnerLink").addEventListener("click",e=>{ if(e.currentTarget.hasAttribute("data-pending")) e.preventDefault(); });
 
 /* ---------- partículas ---------- */
 function jato(n){ for(let i=0;i<n;i++) E.part.push({x:A.x+2,y:A.y+A.h-3,vx:rnd(-60,-20),vy:rnd(10,60),v:rnd(.25,.5),c:Math.random()<.5?PAL.laranja:PAL.ouro}); }
@@ -429,14 +404,13 @@ function abrirCarta(){
   const nova=faltam.length>0;
   const c=nova?faltam[0]:CARTAS[rint(0,CARTAS.length-1)];
   E.coletadas.add(c.id);
-  const ct=cartaTxt(c);
-  $("cNova").textContent=nova?`${AB.t("j.nova")} ${E.coletadas.size}/${CARTAS.length}`:AB.t("j.repetida");
-  $("cTitulo").textContent=ct.nome;
-  $("cMeta").innerHTML=ct.meta.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("");
-  $("cFatos").innerHTML=ct.fatos.map(f=>`<li>${f}</li>`).join("");
-  $("cFonte").textContent=AB.t("j.fonte")+ct.fonte;
+  $("cNova").textContent=nova?`NOVA CARTA! ${E.coletadas.size}/${CARTAS.length}`:"CARTA REPETIDA, MAS VALE RELER!";
+  $("cTitulo").textContent=c.nome;
+  $("cMeta").innerHTML=c.meta.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("");
+  $("cFatos").innerHTML=c.fatos.map(f=>`<li>${f}</li>`).join("");
+  $("cFonte").textContent="Fonte: "+c.fonte;
   desenharArte($("cArte"), c.arte);
-  const foto=$("cFoto"); foto.hidden=true; foto.alt=AB.t("j.foto")+ct.nome;
+  const foto=$("cFoto"); foto.hidden=true; foto.alt="Foto: "+c.nome;
   foto.onload=()=>{ foto.hidden=false; }; foto.onerror=()=>{ foto.hidden=true; }; foto.src=c.foto;
   E.modo="carta"; $("cardwrap").dataset.open=""; $("contBtn").focus();
   atualizaHud();
@@ -554,13 +528,13 @@ function passo(dt){
 }
 
 function bater(){
-  SOM.batida(); E.tremor=calmo()?0:0.35;
+  SOM.batida(); E.tremor=calmo?0:0.35;
   brilhos(A.x+6,A.y+7,40,[PAL.laranja,PAL.ouro,"#FFF4DC","#8C85A0"]);
   E.modo="caindo"; E.rec=Math.max(E.rec,E.dist); atualizaHud();
   setTimeout(()=>{
     E.modo="fim";
-    $("fimTexto").textContent=AB.t("j.fimTxt").replace("{d}",Math.floor(E.dist)).replace("{c}",E.coletadas.size).replace("{t}",CARTAS.length);
-    $("album").innerHTML=CARTAS.map(c=>`<span class="${E.coletadas.has(c.id)?"got":""}">${E.coletadas.has(c.id)?cartaTxt(c).nome:"???"}</span>`).join("");
+    $("fimTexto").textContent=`Você percorreu ${Math.floor(E.dist)} mil km e encontrou ${E.coletadas.size} de ${CARTAS.length} cartas.`;
+    $("album").innerHTML=CARTAS.map(c=>`<span class="${E.coletadas.has(c.id)?"got":""}">${E.coletadas.has(c.id)?c.nome:"???"}</span>`).join("");
     $("fim").dataset.open=""; $("againBtn").focus();
   }, 900);
 }
@@ -578,7 +552,7 @@ function desenhar(){
   // estrelas
   for(const s of estrelasFundo){
     const x=((s.x - E.fundoX*s.z)%W+W)%W;
-    const pisca=calmo()?1:(Math.sin(E.t*2+s.f)>-0.6?1:0.35);
+    const pisca=calmo?1:(Math.sin(E.t*2+s.f)>-0.6?1:0.35);
     ctx.globalAlpha=pisca; ctx.fillStyle=s.c; ctx.fillRect(x|0,s.y|0,1,1);
   }
   ctx.globalAlpha=1;
@@ -628,7 +602,7 @@ function loop(agora){
   let dt=Math.min(0.05,(agora-ultimo)/1000); ultimo=agora;
   if(E.modo==="jogando") passo(dt);
   else if(E.modo==="caindo"){ E.part.forEach(p=>{ p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=40*dt; p.v-=dt; }); E.part=E.part.filter(p=>p.v>0); if(E.tremor>0) E.tremor-=dt; }
-  else if(E.modo==="inicio" && !calmo()){ E.fundoX+=20*dt; E.t+=dt; A.frame+=dt*4; }
+  else if(E.modo==="inicio" && !calmo){ E.fundoX+=20*dt; E.t+=dt; A.frame+=dt*4; }
   desenhar();
   requestAnimationFrame(loop);
 }

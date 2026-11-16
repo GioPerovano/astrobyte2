@@ -28,7 +28,7 @@
 
   const COMUM = {
     pt: {
-      "menu.btn": "Menu", "menu.aria": "Menu principal", "menu.ra": "Realidade aumentada", "menu.jogo": "Jogo",
+      "menu.btn": "Menu", "menu.aria": "Menu principal", "menu.ra": "Realidade aumentada", "menu.game": "game",
       "menu.cartas": "Card game", "menu.parceiro": "Parceiro", "menu.spherex": "SPHEREx · Planeta X",
       "logo.aria": "AstroByte, início",
       "rodape.redes": "Redes sociais do AstroByte", "rodape.fale": "Fale com a gente:",
@@ -40,7 +40,7 @@
       "ab.restaurar": "Restaurar padrão", "ab.fechar": "Fechar", "ab.semvoz": "Seu navegador não tem leitura em voz alta."
     },
     en: {
-      "menu.btn": "Menu", "menu.aria": "Main menu", "menu.ra": "Augmented reality", "menu.jogo": "Game",
+      "menu.btn": "Menu", "menu.aria": "Main menu", "menu.ra": "Augmented reality", "menu.game": "Game",
       "menu.cartas": "Card game", "menu.parceiro": "Partner", "menu.spherex": "SPHEREx · Planet X",
       "logo.aria": "AstroByte, home",
       "rodape.redes": "AstroByte social media", "rodape.fale": "Contact us:",
