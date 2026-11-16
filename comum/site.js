@@ -14,7 +14,8 @@ document.getElementById("partnerLink").addEventListener("click",e=>{ if(e.curren
 (function ceu(){
   const cv=document.getElementById("ceu"), ctx=cv.getContext && cv.getContext("2d");
   if(!ctx) return;
-  const calmo=!!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const calmoF=()=>window.AB?AB.movimentoReduzido():!!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+  let parado=false;
   let W=0,H=0,dpr=1,estrelas=[],cadente=null,proxCadente=performance.now()+5000;
   const cores=["255,244,220","255,214,150","200,215,255","255,255,255"];
   function criar(){
@@ -29,6 +30,9 @@ document.getElementById("partnerLink").addEventListener("click",e=>{ if(e.curren
     });
   }
   function desenhar(t){
+    const calmo=calmoF();
+    if(calmo && parado){ requestAnimationFrame(desenhar); return; }
+    parado=calmo;
     ctx.clearRect(0,0,W,H);
     for(const s of estrelas){
       if(!calmo){ s.x+=s.v; s.y+=s.v*.35; if(s.x>W+2) s.x=-2; if(s.y>H+2) s.y=-2; }
@@ -49,9 +53,9 @@ document.getElementById("partnerLink").addEventListener("click",e=>{ if(e.curren
         ctx.strokeStyle=g; ctx.lineWidth=1.6; ctx.beginPath(); ctx.moveTo(x-90,y-38); ctx.lineTo(x,y); ctx.stroke();
         if(p>=1){ cadente=null; proxCadente=t+9000+Math.random()*9000; }
       }
-      requestAnimationFrame(desenhar);
     }
+    requestAnimationFrame(desenhar);
   }
-  criar(); addEventListener("resize",()=>{ criar(); if(calmo) desenhar(0); });
+  criar(); addEventListener("resize",()=>{ criar(); parado=false; });
   requestAnimationFrame(desenhar);
 })();

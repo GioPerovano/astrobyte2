@@ -90,3 +90,35 @@ python3 gerar_usdz.py      # cria os .usdz animados (iPhone)
 ```
 
 O primeiro script lê as imagens da pasta `texturas` e grava os `.glb` em `modelos`. O segundo converte cada `.glb` em `.usdz`. Sempre que mudar um modelo, rode os dois. Depois, copie o conteúdo de `modelos/rotulos.json` para a linha `const HOTSPOTS = ...` do `index.html` se mudar a posição de algum ponto clicável.
+
+## Idioma (PT/EN)
+
+Todas as páginas têm os botões **PT | EN** no topo (no jogo, na barra de cima). A escolha fica salva no navegador, e também dá para abrir direto em inglês com `?lang=en` no fim do link (por exemplo `ar/?lang=en#marte`).
+
+- Os textos fixos usam `data-i18n="chave"`. As traduções ficam no próprio `index.html` de cada página, em `AB.registrar({pt:{...}, en:{...}})`.
+- Na realidade aumentada, as 10 experiências em inglês estão em `SCENES_EN`. No jogo, as cartas estão em `CARTAS_EN`.
+- Os textinhos gravados **dentro** dos modelos 3D continuam em português.
+
+## Acessibilidade
+
+O botão com o ícone de pessoa, ao lado do idioma, abre o painel com estas opções:
+- tamanho do texto, em 4 níveis;
+- alto contraste;
+- reduzir movimento, que para as estrelas, as animações e o giro dos modelos 3D;
+- fonte mais legível;
+- sublinhar links;
+- ouvir o texto da página em voz alta.
+
+As escolhas ficam salvas no navegador. Tudo isso está em `comum/ferramentas.js`.
+
+## SPHEREx · Planeta X (espaço do parceiro)
+
+O link "Parceiro" do menu agora abre `spherex/`, com:
+- **Mapa do céu interativo:** feito com o Aladin Lite, com imagens em luz visível (DSS2), infravermelho próximo (2MASS) e infravermelho médio (AllWISE, NASA).
+- **Busca:** por nome do objeto ou por coordenadas (AR/Dec em graus ou em h m s).
+- **Busca de anomalias no SIMBAD:** objetos com movimento próprio alto, anãs marrons, estrelas variáveis, estrelas jovens, novas, supernovas e anãs brancas.
+- **Gráficos:** eventos por tipo, histograma do movimento próprio, mapa dos eventos e quanto os objetos mais rápidos andam em 10 anos.
+- **Downloads:** recorte de imagem em JPG ou dados científicos em FITS (via hips2fits do CDS) e o mapa em PNG.
+- **Link para o parceiro:** um botão que abre o SPHEREx Sky Explorer do parceiro.
+
+Esses serviços são externos (CDS/Strasbourg). Se algum estiver fora do ar, a página mostra um aviso e o restante continua funcionando.

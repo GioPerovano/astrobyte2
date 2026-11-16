@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>AstroByte AR: o universo na sua câmera</title>
+<title data-i18n="ar.titulo">AstroByte AR: o universo na sua câmera</title>
 <meta name="description" content="Dez experiências de realidade aumentada no navegador: missões da NASA, planetas e a hipótese do Planeta X.">
 <meta name="theme-color" content="#000000">
 <link rel="icon" href="../comum/logo-topo.png">
@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Exo+2:ital,wght@0,600;0,700;1,700&display=swap" rel="stylesheet">
 <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+<script src="../comum/ferramentas.js"></script>
 <style>
 /* Paleta tirada da logo: creme, dourado e laranja sobre o preto do espaço.
    A página é sempre escura, nos dois modos do sistema, porque o céu é a identidade do AstroByte. */
@@ -149,62 +150,64 @@ button:focus-visible, a:focus-visible, summary:focus-visible{outline:3px solid v
 <div class="nebula" aria-hidden="true"></div>
 
 <header class="top">
-  <a class="logo" href="../" aria-label="AstroByte, início"><img src="../comum/logo-topo.png" alt="AstroByte" width="73" height="46"></a>
+  <a class="logo" href="../" aria-label="AstroByte, início" data-i18n-attr="aria-label:logo.aria"><img src="../comum/logo-topo.png" alt="AstroByte" width="73" height="46"></a>
+  <div id="abFerramentas"></div>
   <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span data-i18n="menu.btn">Menu</span>
   </button>
-  <nav class="menu" id="menu" aria-label="Menu principal">
-    <a href="./" aria-current="page">Realidade aumentada</a>
+  <nav class="menu" id="menu" aria-label="Menu principal" data-i18n-attr="aria-label:menu.aria">
+    <a href="./" aria-current="page" data-i18n="menu.ra">Realidade aumentada</a>
     <a href="https://spherex-data-access.vercel.app/">SPHEREx Sky Explorer</a>
-    <a href="../jogo/">Jogo</a>
+    <a href="../jogo/" data-i18n="menu.jogo">Jogo</a>
     <span class="sep" aria-hidden="true"></span>
-    <!-- Espaço do site parceiro: troque o "#" pelo endereço e o texto pelo nome do site. -->
+    <!-- Espaço do parceiro: a parte SPHEREx · Planeta X (pasta spherex/). -->
     <div class="partner">
-      <small>Parceiro</small>
-      <a href="#" id="partnerLink" data-pending>Site parceiro</a>
+      <small data-i18n="menu.parceiro">Parceiro</small>
+      <a href="../spherex/" id="partnerLink" data-i18n="menu.spherex">SPHEREx · Planeta X</a>
     </div>
   </nav>
 </header>
 
 <main class="app">
-  <section class="stage" aria-label="Visualizador 3D">
+  <section class="stage" aria-label="Visualizador 3D" data-i18n-attr="aria-label:ar.stage">
     <div class="stepper">
-      <button type="button" id="prev" aria-label="Experiência anterior">‹</button>
-      <button type="button" id="next" aria-label="Próxima experiência">›</button>
+      <button type="button" id="prev" aria-label="Experiência anterior" data-i18n-attr="aria-label:ar.anterior">‹</button>
+      <button type="button" id="next" aria-label="Próxima experiência" data-i18n-attr="aria-label:ar.proxima">›</button>
     </div>
     <model-viewer id="mv" ar ar-modes="webxr scene-viewer quick-look" ar-placement="floor" ar-scale="auto"
       camera-controls touch-action="pan-y" shadow-intensity="0" environment-image="neutral" exposure="1.2"
       autoplay interaction-prompt="auto" alt="Modelo 3D">
       <button slot="ar-button" class="ar-btn" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="m3 7 9 5 9-5M12 12v10"/></svg>
-        Realidade aumentada
+        <span data-i18n="ar.botao">Realidade aumentada</span>
       </button>
       <div class="progress" slot="progress-bar"><span id="bar"></span></div>
       <p class="ar-tip" id="arTip" role="status"></p>
       <p class="ar-info" id="arInfo" role="status"></p>
     </model-viewer>
-    <p class="no-ar" id="noAr" hidden>Abra no celular para ver na sua sala.</p>
+    <p class="no-ar" id="noAr" hidden data-i18n="ar.noAr">Abra no celular para ver na sua sala.</p>
   </section>
 
-  <aside class="panel">
-    <nav aria-label="Experiências"><div class="scenes" id="scenes"></div></nav>
+  <aside class="panel" data-ab-leitura>
+    <nav aria-label="Experiências" data-i18n-attr="aria-label:ar.exp"><div class="scenes" id="scenes"></div></nav>
     <h1 id="title"></h1>
     <p class="lead" id="lead"></p>
     <dl class="quick" id="quick"></dl>
     <p class="tip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg><span id="tip"></span></p>
     <details id="moreBox">
-      <summary>Saiba mais</summary>
+      <summary data-i18n="ar.saiba">Saiba mais</summary>
       <div class="more">
         <div id="facts"></div>
-        <h2>Curiosidade</h2><p id="curio"></p>
-        <h2>Pense nisso</h2><p id="think"></p>
-        <h2>Como usar</h2>
-        <ul>
+        <h2 data-i18n="ar.curio">Curiosidade</h2><p id="curio"></p>
+        <h2 data-i18n="ar.pense">Pense nisso</h2><p id="think"></p>
+        <h2 data-i18n="ar.como">Como usar</h2>
+        <ul data-i18n-html="ar.uso">
           <li>Toque em <b>Realidade aumentada</b> e aponte para o chão.</li>
           <li>Um dedo arrasta. Dois dedos giram e mudam o tamanho.</li>
           <li>Toque nos pontos dourados para ler sobre cada parte.</li>
         </ul>
         <p class="source" id="source"></p>
+        <p class="source" data-i18n="ar.textos3d" data-so-en></p>
       </div>
     </details>
   </aside>
@@ -212,15 +215,15 @@ button:focus-visible, a:focus-visible, summary:focus-visible{outline:3px solid v
 
 <footer class="foot">
   <img src="../comum/logo-topo.png" alt="AstroByte" width="101" height="64" loading="lazy">
-  <ul class="social" aria-label="Redes sociais do AstroByte">
+  <ul class="social" aria-label="Redes sociais do AstroByte" data-i18n-attr="aria-label:rodape.redes">
     <li><a href="https://www.youtube.com/@astrobyte.nasaspace" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="m10 9 5 3-5 3z" fill="currentColor"/></svg>YouTube</a></li>
     <li><a href="https://www.instagram.com/astrobyte.nasa/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>Instagram</a></li>
     <li><a href="https://www.tiktok.com/@astrobyte.nasa" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 3v11a4 4 0 1 1-4-4"/><path d="M14 3c.5 3 2.5 5 5 5"/></svg>TikTok</a></li>
     <li><a href="https://x.com/astrobyte_nasa" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m4 4 16 16M20 4 4 20"/></svg>X</a></li>
     <li><a href="https://www.facebook.com/profile.php?id=61596774111667" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h-2a4 4 0 0 0-4 4v14M6 11h8"/></svg>Facebook</a></li>
   </ul>
-  <p class="mail">Fale com a gente: <a href="mailto:astrobyte.nasa@gmail.com">astrobyte.nasa@gmail.com</a></p>
-  <p class="credit">Página criada pela equipe AstroByte para o NASA Space Apps Challenge 2026. Imagens e dados científicos: NASA.</p>
+  <p class="mail"><span data-i18n="rodape.fale">Fale com a gente:</span> <a href="mailto:astrobyte.nasa@gmail.com">astrobyte.nasa@gmail.com</a></p>
+  <p class="credit" data-i18n="rodape.credito">Página criada pela equipe AstroByte para o NASA Space Apps Challenge 2026. Imagens e dados científicos: NASA.</p>
 </footer>
 
 <script>
@@ -310,11 +313,108 @@ const SCENES = {
    think:"Por que é tão difícil achar um planeta assim, tão longe do Sol?", source:NASA+" Planeta X: textura da equipe." }
 };
 
+/* ---------------- English version (same keys) ---------------- */
+const NASA_EN = 'Images: NASA (NASA 3D Resources and Blue Marble). Data: NASA Planetary Fact Sheet.';
+const F_EN = {
+  mercurio:["Mercury","The smallest planet and the closest to the Sun. A year lasts 88 days."],
+  venus:["Venus","The hottest planet: 464 °C. It spins backwards compared to the others."],
+  terra:["Earth","12,756 km across. Its tilted axis creates the seasons."],
+  lua:["Moon","It takes 27 days to orbit Earth and always shows us the same face."],
+  marte:["Mars","Half the size of Earth. Home to the largest volcano in the Solar System."],
+  jupiter:["Jupiter","The largest planet. A day there lasts less than 10 hours."],
+  saturno:["Saturn","Its rings are made of ice and rock, and they are very thin."],
+  urano:["Uranus","It spins lying down, with its axis almost on its side."],
+  netuno:["Neptune","The farthest planet. It has the strongest winds in the Solar System."]
+};
+const SCENES_EN = {
+ "spherex":{ nav:"SPHEREx", title:"SPHEREx", lead:"The NASA telescope that photographs the whole sky in 102 infrared colors.",
+   quick:[["Launched","2025"],["Colors","102"],["Whole sky","every 6 months"]],
+   tip:"Look down into the cones: the glow at the bottom is the telescope.",
+   cards:{ escudos:["Shields","Three cones that cast shade and keep the telescope very cold."], telescopio:["Telescope","Splits light into 102 infrared bands."] },
+   curio:"Infrared reveals cold, hidden things, like ice and dust between the stars.",
+   think:"Why does an infrared telescope need to stay cold?", source:"Simplified model made by the team." },
+ "spitzer":{ nav:"Spitzer", title:"Spitzer at real size", lead:"NASA's official model at 1:1 scale. It observed the infrared sky from 2003 to 2020.",
+   quick:[["Height","4.5 m"],["Mirror","85 cm"],["Mission","2003–2020"]],
+   tip:"Step back three paces before placing it, then stand next to it to compare.",
+   cards:{}, curio:"It stayed far from Earth to escape our planet's heat.",
+   think:"What changes between looking at a few targets (Spitzer) and photographing the whole sky (SPHEREx)?", source:"NASA's official 3D model." },
+ "ceu":{ nav:"The whole sky", title:"The whole sky", lead:"A globe with the stars of the entire sky. The bright band is the Milky Way.",
+   quick:[["Diameter","80 cm"],["Stars","millions"],["One turn in","60 s"]],
+   tip:"Get really close: the stars glow even in the dark.",
+   cards:{ polo:["North celestial pole","Where Earth's axis points. The North Star is close to it."] },
+   curio:"On a celestial globe the stars look mirrored, because we see the sky from the outside.",
+   think:"If we live inside the Milky Way, how do we know it is a disk?", source:"Tycho star map (NASA)." },
+ "sistema-solar":{ nav:"8 planets", title:"The 8 planets", lead:"Sizes to scale with each other. Distances were shortened.",
+   quick:[["Largest","Jupiter"],["Smallest","Mercury"],["Sun at this scale","2.6 m"]],
+   tip:"Compare Earth with Jupiter and watch Uranus spinning on its side.",
+   cards:{ "Mercúrio":F_EN.mercurio,"Vênus":F_EN.venus,"Terra":F_EN.terra,"Marte":F_EN.marte,"Júpiter":F_EN.jupiter,"Saturno":F_EN.saturno,"Urano":F_EN.urano,"Netuno":F_EN.netuno },
+   curio:"Jupiter has more mass than all the other planets combined.",
+   think:"If Earth were 2.4 cm wide, how far from the Sun would it be? (About 280 meters!)", source:NASA_EN+" Mercury and Uranus: textures made by the team." },
+ "terra-lua":{ nav:"Earth and Moon", title:"Earth and Moon", lead:"The Moon orbits Earth and always shows us the same side.",
+   quick:[["Moon's orbit","27.3 days"],["Distance","384,000 km"],["Day on Earth","24 h"]],
+   tip:"Stand still and follow the Moon: the side with dark spots always faces Earth.",
+   cards:{ terra:F_EN.terra, lua:F_EN.lua },
+   curio:"The Moon moves away from Earth by about 3.8 cm every year.",
+   think:"Is there a side of the Moon that never gets sunlight?", source:NASA_EN+" At real scale, the Moon would be 7 m away." },
+ "marte":{ nav:"Mars", title:"Mars", lead:"The red planet: its color comes from rusty, iron-rich dust.",
+   quick:[["Diameter","6,792 km"],["One day","24 h 37 min"],["One year","687 days"]],
+   tip:"Look for the white patch at the top: it is the ice cap.",
+   cards:{ calota:["Polar cap","Water ice and carbon dioxide ice that grows and shrinks with the seasons."] },
+   curio:"Olympus Mons, on Mars, is about two and a half times as tall as Mount Everest.",
+   think:"Why is Mars so cold, even though its days are like ours?", source:NASA_EN },
+ "jupiter":{ nav:"Jupiter", title:"Jupiter and its moons", lead:"The four moons Galileo saw in 1610, orbiting in a matched rhythm.",
+   quick:[["Diameter","142,984 km"],["One day","9 h 56 min"],["Moons","more than 90"]],
+   tip:"Count the laps: Io, the closest one, is the fastest.",
+   cards:{ faixas:["Cloud bands","Ammonia clouds pulled by very strong winds."] },
+   curio:"Ganymede, a moon of Jupiter, is bigger than the planet Mercury.",
+   think:"Why do moons end up orbiting in such neat rhythms?", source:NASA_EN+" Moons shown 3 times larger than scale." },
+ "saturno":{ nav:"Saturn", title:"Saturn", lead:"Rings that are huge in width but as thin as a sheet of paper.",
+   quick:[["Diameter","120,536 km"],["One day","10 h 33 min"],["Moons","more than 270"]],
+   tip:"Crouch down to ring level: they almost disappear.",
+   cards:{ aneis:["Rings","Billions of pieces of ice and rock orbiting the planet."], divisao:["Cassini Division","A gap between the rings, opened by the gravity of the moon Mimas."] },
+   curio:"Saturn is so light for its size that it would float in a giant bathtub.",
+   think:"If the rings are so thin, how can we see them from here?", source:NASA_EN+" Rings drawn by the team." },
+ "planeta-x":{ nav:"Planet X orbits", title:"The Planet X clue", lead:"Distant orbits that point in similar directions. A hidden planet would explain it.",
+   quick:[["Proposed in","2016"],["Estimated mass","a few Earths"],["Seen yet?","not yet"]],
+   tip:"Follow Sedna: near the Sun it races, far away it slows down.",
+   cards:{ sedna:["Sedna","It takes more than 11,000 years to orbit the Sun."], "2012-vp113":["2012 VP113","Another distant object with a very long orbit."],
+           "planeta-x":["Planet X","The dashed orbit is a hypothesis. Nobody has seen it yet."], sol:["Sun","Neptune and Pluto are also near the center."] },
+   curio:"Neptune was also predicted before it was seen, in 1846, because of its gravity.",
+   think:"How can you suspect a planet exists without ever seeing it?", source:"Approximate orbits, based on the JPL Small-Body Database." },
+ "tamanho":{ nav:"Planet X size", title:"How big is it?", lead:"Planet X would be bigger than Earth and smaller than Neptune.",
+   quick:[["Earth","1 x"],["Planet X","~2 x"],["Neptune","3.9 x"]],
+   tip:"Walk around: Planet X glows purple because it is a hypothesis.",
+   cards:{ terra:F_EN.terra, px:["Planet X","Size and color are illustrative: nobody has seen it yet."], netuno:F_EN.netuno },
+   curio:"Infrared telescopes help search for cold planets that barely shine.",
+   think:"Why is it so hard to find a planet like this, so far from the Sun?", source:NASA_EN+" Planet X: texture made by the team." }
+};
+const ROTULOS_EN = {"Escudos":"Shields","Telescópio":"Telescope","Polo norte celeste":"North celestial pole","Mercúrio":"Mercury","Vênus":"Venus","Terra":"Earth","Marte":"Mars","Júpiter":"Jupiter","Saturno":"Saturn","Urano":"Uranus","Netuno":"Neptune","Lua":"Moon","Calota polar":"Polar cap","Faixas de nuvens":"Cloud bands","Anéis":"Rings","Divisão de Cassini":"Cassini Division","Planeta X":"Planet X","Sol":"Sun"};
+const CEN = () => (window.AB && AB.lang === "en") ? SCENES_EN : SCENES;
+const rotulo = l => (window.AB && AB.lang === "en" && ROTULOS_EN[l]) || l;
+
+AB.registrar({
+ pt:{ "ar.titulo":"AstroByte AR: o universo na sua câmera","ar.stage":"Visualizador 3D","ar.anterior":"Experiência anterior","ar.proxima":"Próxima experiência",
+   "ar.botao":"Realidade aumentada","ar.noAr":"Abra no celular para ver na sua sala.","ar.exp":"Experiências","ar.saiba":"Saiba mais",
+   "ar.curio":"Curiosidade","ar.pense":"Pense nisso","ar.como":"Como usar",
+   "ar.uso":"<li>Toque em <b>Realidade aumentada</b> e aponte para o chão.</li><li>Um dedo arrasta. Dois dedos giram e mudam o tamanho.</li><li>Toque nos pontos dourados para ler sobre cada parte.</li>",
+   "ar.sobre":"Sobre","ar.erro":"O modelo não carregou. Recarregue a página.","ar.modelo":"Modelo 3D",
+   "ar.textos3d":"Os textinhos dentro do modelo 3D aparecem em português." },
+ en:{ "ar.titulo":"AstroByte AR: the universe in your camera","ar.stage":"3D viewer","ar.anterior":"Previous experience","ar.proxima":"Next experience",
+   "ar.botao":"Augmented reality","ar.noAr":"Open on your phone to see it in your room.","ar.exp":"Experiences","ar.saiba":"Learn more",
+   "ar.curio":"Fun fact","ar.pense":"Think about it","ar.como":"How to use",
+   "ar.uso":"<li>Tap <b>Augmented reality</b> and point at the floor.</li><li>One finger drags. Two fingers rotate and resize.</li><li>Tap the golden dots to read about each part.</li>",
+   "ar.sobre":"About","ar.erro":"The model did not load. Please reload the page.","ar.modelo":"3D model",
+   "ar.textos3d":"The small labels inside the 3D model are in Portuguese." }
+});
+
 const mv=document.getElementById("mv"), $=id=>document.getElementById(id);
 let current=ORDEM[0];
 const esc=t=>{const d=document.createElement("div"); d.textContent=t; return d.innerHTML;};
 
-$("scenes").innerHTML=ORDEM.map(id=>`<button type="button" data-id="${id}" aria-current="false">${SCENES[id].nav}</button>`).join("");
+function avisoIdioma(){ document.querySelectorAll("[data-so-en]").forEach(e=>e.hidden=AB.lang!=="en"); }
+AB.aoMudarIdioma(avisoIdioma); document.addEventListener("DOMContentLoaded",avisoIdioma); avisoIdioma();
+function montarCenas(){ $("scenes").innerHTML=ORDEM.map(id=>`<button type="button" data-id="${id}" aria-current="false">${esc(CEN()[id].nav)}</button>`).join(""); }
+montarCenas();
 
 function flash(el, ms){ el.dataset.open=""; clearTimeout(el._t); el._t=setTimeout(()=>delete el.dataset.open, ms); }
 
@@ -324,15 +424,15 @@ function setHotspots(id){
     const b=document.createElement("button");
     b.type="button"; b.className="hotspot"; b.slot=`hotspot-${k}`;
     b.dataset.position=h.pos; b.dataset.visibilityAttribute="visible";
-    b.setAttribute("aria-label",`Sobre ${h.label}`);
-    b.innerHTML=`<span class="dot" aria-hidden="true">+</span>`+(ONLY_DOT.includes(id)?"":`<span class="txt">${esc(h.label)}</span>`);
+    b.setAttribute("aria-label",`${AB.t("ar.sobre")} ${rotulo(h.label)}`);
+    b.innerHTML=`<span class="dot" aria-hidden="true">+</span>`+(ONLY_DOT.includes(id)?"":`<span class="txt">${esc(rotulo(h.label))}</span>`);
     b.addEventListener("click",()=>openCard(h.id));
     mv.appendChild(b);
   });
 }
 
 function openCard(key){
-  const c=SCENES[current].cards[key]; if(!c) return;
+  const c=CEN()[current].cards[key]; if(!c) return;
   $("arInfo").innerHTML=`<strong>${esc(c[0])}</strong>: ${esc(c[1])}`; flash($("arInfo"),7000);
   $("moreBox").open=true;
   const el=$("fact-"+key);
@@ -341,8 +441,8 @@ function openCard(key){
 
 function show(id){
   current=ORDEM.includes(id)?id:ORDEM[0];
-  const s=SCENES[current];
-  mv.src=MODELS[current]; mv.iosSrc=IOS[current]||""; mv.alt=s.title;
+  const s=CEN()[current];
+  mv.src=MODELS[current]; mv.iosSrc=IOS[current]||""; mv.alt=`${AB.t("ar.modelo")}: ${s.title}`;
   if(IOS[current]) mv.setAttribute("ios-src",IOS[current]); else mv.removeAttribute("ios-src");
   mv.setAttribute("camera-orbit","auto auto auto"); mv.cameraOrbit="auto auto auto";
   setHotspots(current);
@@ -364,12 +464,15 @@ $("scenes").addEventListener("click",e=>{const b=e.target.closest("button[data-i
 $("prev").addEventListener("click",()=>go(ORDEM[(ORDEM.indexOf(current)+ORDEM.length-1)%ORDEM.length]));
 $("next").addEventListener("click",()=>go(ORDEM[(ORDEM.indexOf(current)+1)%ORDEM.length]));
 window.addEventListener("hashchange",()=>show(idFromHash()));
+AB.aoMudarIdioma(()=>{ montarCenas(); show(current); });
 
 mv.addEventListener("ar-status",e=>{ if(e.detail.status==="session-started") flash($("arTip"),6000); });
 mv.addEventListener("progress",e=>{ $("bar").style.width=(e.detail.totalProgress*100)+"%";
   if(e.detail.totalProgress>=1) setTimeout(()=>{$("bar").style.width="0"},400); });
-mv.addEventListener("load",()=>{ $("noAr").hidden=!!mv.canActivateAR; if(mv.play) mv.play(); });
-mv.addEventListener("error",()=>{ $("noAr").hidden=false; $("noAr").textContent="O modelo não carregou. Recarregue a página."; });
+function animarModelo(){ if(AB.movimentoReduzido()){ if(mv.pause) mv.pause(); } else if(mv.play) mv.play(); }
+mv.addEventListener("load",()=>{ $("noAr").hidden=!!mv.canActivateAR; animarModelo(); });
+window.addEventListener("ab:acessibilidade", animarModelo);
+mv.addEventListener("error",()=>{ $("noAr").hidden=false; $("noAr").removeAttribute("data-i18n"); $("noAr").textContent=AB.t("ar.erro"); });
 
 show(idFromHash());
 
@@ -381,14 +484,14 @@ menuBtn.addEventListener("click",()=>{
   if(open) menu.dataset.open=""; else delete menu.dataset.open;
 });
 document.addEventListener("click",e=>{ if(!menu.contains(e.target)&&!menuBtn.contains(e.target)){ delete menu.dataset.open; menuBtn.setAttribute("aria-expanded","false"); } });
-// enquanto o site parceiro não tiver endereço, o link não faz nada
-$("partnerLink").addEventListener("click",e=>{ if(e.currentTarget.hasAttribute("data-pending")) e.preventDefault(); });
+
 
 /* ---------- céu estrelado animado ---------- */
 (function ceu(){
   const cv=$("ceu"), ctx=cv.getContext && cv.getContext("2d");
   if(!ctx) return;
-  const calmo=!!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const calmoF=()=>window.AB?AB.movimentoReduzido():!!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+  let parado=false;
   let W=0,H=0,dpr=1,estrelas=[],cadente=null,proxCadente=performance.now()+5000;
   const cores=["255,244,220","255,214,150","200,215,255","255,255,255"];
   function criar(){
@@ -403,6 +506,9 @@ $("partnerLink").addEventListener("click",e=>{ if(e.currentTarget.hasAttribute("
     });
   }
   function desenhar(t){
+    const calmo=calmoF();
+    if(calmo && parado){ requestAnimationFrame(desenhar); return; }
+    parado=calmo;
     ctx.clearRect(0,0,W,H);
     for(const s of estrelas){
       if(!calmo){ s.x+=s.v; s.y+=s.v*.35; if(s.x>W+2) s.x=-2; if(s.y>H+2) s.y=-2; }
@@ -423,10 +529,10 @@ $("partnerLink").addEventListener("click",e=>{ if(e.currentTarget.hasAttribute("
         ctx.strokeStyle=g; ctx.lineWidth=1.6; ctx.beginPath(); ctx.moveTo(x-90,y-38); ctx.lineTo(x,y); ctx.stroke();
         if(p>=1){ cadente=null; proxCadente=t+9000+Math.random()*9000; }
       }
-      requestAnimationFrame(desenhar);
     }
+    requestAnimationFrame(desenhar);
   }
-  criar(); addEventListener("resize",()=>{ criar(); if(calmo) desenhar(0); });
+  criar(); addEventListener("resize",()=>{ criar(); parado=false; });
   requestAnimationFrame(desenhar);
 })();
 </script>
